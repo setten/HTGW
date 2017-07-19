@@ -1,4 +1,4 @@
 __author__ = 'setten'
 
-from GWplotting.collection import Collection
+# from HTGW.plotting.collection import Collection
 

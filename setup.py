@@ -32,17 +32,17 @@ def file_doesnt_end_with(test, endings):
 
 
 def find_package_data():
-    """Find pseudo_dojo's package_data."""
+    """Find package_data."""
     package_data = {}
     return package_data
 
 
 def find_scripts():
-    """Find pseudo_dojo scripts."""
+    """Find scripts."""
     scripts = []
     #
-    # All python files in abipy/scripts
-    pyfiles = glob(os.path.join('GWplotting', 'scripts', "*.py") )
+    # All python files in HTGW/scripts
+    pyfiles = glob(os.path.join('HTGW', 'scripts', "*.py") )
     scripts.extend(pyfiles)
     return scripts
 
@@ -52,10 +52,10 @@ def cleanup():
     if "develop" not in sys.argv:
         import shutil
         try:
-            shutil.rmtree('pseudo_dojo.egg-info')
+            shutil.rmtree('HTGW.egg-info')
         except:
             try:
-                os.unlink('pseudo_dojo.egg-info')
+                os.unlink('HTGW.egg-info')
             except:
                 pass
 
@@ -66,7 +66,7 @@ install_requires = [
     #"periodictable",
     #"numpy>=1.5",
     #"scipy>=0.10",
-    "pymongo"
+    "pymongo",
     "matplotlib>=1.1",
     "pymatgen>=2.9.0",
 ]
@@ -84,12 +84,12 @@ my_package_data = find_package_data()
 
 # Create a dict with the basic information
 # This dict is eventually passed to setup after additional keys are added.
-setup_args = dict(name="GWplotting",
-                  version="version",
-                  description="description",
-                  long_description="long_description",
-                  author="author",
-                  author_email="author_email",
+setup_args = dict(name="HTGW",
+                  version="0.0.0",
+                  description="package for automatic GW calculations",
+                  long_description="convergence testing, plotting, flowgeneration,  ",
+                  author="Michiel van Setten",
+                  author_email="mjvansetten@gmail.com",
                   #url=url,
                   #download_url=download_url,
                   license="license",
