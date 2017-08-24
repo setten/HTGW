@@ -9,13 +9,6 @@ factory function at the end.
 """
 from __future__ import unicode_literals, division, print_function
 
-__author__ = "Michiel van Setten"
-__copyright__ = " "
-__version__ = "0.9"
-__maintainer__ = "Michiel van Setten"
-__email__ = "mjvansetten@gmail.com"
-__date__ = "May 2014"
-
 import os
 import shutil
 import six
@@ -25,11 +18,18 @@ import logging
 from abc import abstractproperty, abstractmethod, ABCMeta
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.core.units import Ha_to_eV
-from pymatgen.io.abinit.netcdf import NetcdfReader
+from abipy.flowtk.netcdf import NetcdfReader
 from HTGW.flows.helpers import is_converged, read_grid_from_file, s_name, expand, store_conv_results
 from HTGW.flows.GWvaspinputsets import GWscDFTPrepVaspInputSet, GWDFTDiagVaspInputSet, \
      GWG0W0VaspInputSet, SingleVaspGWWork
 from HTGW.flows.GWworks import VaspGWFWWorkFlow, SingleAbinitGWWork
+
+__author__ = "Michiel van Setten"
+__copyright__ = " "
+__version__ = "0.9"
+__maintainer__ = "Michiel van Setten"
+__email__ = "mjvansetten@gmail.com"
+__date__ = "May 2014"
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 

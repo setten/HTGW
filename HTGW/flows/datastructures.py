@@ -152,7 +152,6 @@ class AbstractAbInitioSpec(MSONable):
         if self.data['source'] == 'mp-vasp':
             items_list = mp_list_vasp
         elif self.data['source'] in ['poscar', 'cif']:
-            #files = os.listdir('.')
             files = [f for f in os.listdir('.') if os.path.isfile(os.path.join('.', f))]
             items_list = [f for f in files if f[-3:] == 'cif']
         elif self.data['source'] == 'mar_exp':

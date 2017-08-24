@@ -1,14 +1,9 @@
 from __future__ import division, print_function, unicode_literals
 
-import unittest
-#try:
-#    raise ImportError("No module named sets_deprecated")
-#except ImportError:
-#    raise unittest.SkipTest("Skipping all tests in test_classes due to sets_deprecated")
-
 import os
 import tempfile
 import shutil
+import json
 
 from abipy.abilab import Structure as AbiStructure
 from pymatgen.util.testing import PymatgenTest
@@ -60,9 +55,8 @@ class GWTestHelpers(PymatgenTest):
         Testing helper function to read extra variables
         """
         vars_out = {'ecut': 40}
-        f = open('extra_abivars', 'w')
-        f.write(str(vars_out))
-        f.close()
+        with open('extra_abivars', 'w') as f:
+            json.dump(obj=vars_out, fp=f, indent=2)
         vars_in = read_extra_abivars()
         self.assertEqual(vars_out, vars_in)
         os.remove('extra_abivars')

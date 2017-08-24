@@ -8,24 +8,25 @@ from __future__ import unicode_literals, division, print_function
 Helper methods for generating gw input / and work flows.
 """
 
-__author__ = "Michiel van Setten"
-__copyright__ = " "
-__version__ = "0.9"
-__maintainer__ = "Michiel van Setten"
-__email__ = "mjvansetten@gmail.com"
-__date__ = "May 2014"
-
 import time
 import os
 import ast
 import copy
 import math
 import shutil
+import json
 import numpy as np
 from pymatgen.core.units import eV_to_Ha
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.transformations.standard_transformations import OxidationStateRemovalTransformation, \
     PrimitiveCellTransformation, SupercellTransformation
+
+__author__ = "Michiel van Setten"
+__copyright__ = " "
+__version__ = "0.9"
+__maintainer__ = "Michiel van Setten"
+__email__ = "mjvansetten@gmail.com"
+__date__ = "May 2014"
 
 
 def now():
@@ -38,8 +39,9 @@ def now():
 def read_extra_abivars():
     ea = {}
     if os.path.isfile('extra_abivars'):
-        f = open('extra_abivars')
-        ea = ast.literal_eval(f.read())
+        with open('extra_abivars') as f:
+#        ea = ast.literal_eval(f.read())
+            ea = json.load(fp=f)
         if not isinstance(ea, dict):
             raise RuntimeError
     return ea

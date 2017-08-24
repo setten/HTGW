@@ -24,14 +24,13 @@ from abipy.abilab import Structure as AbiStructure
 from HTGW.flows.GWworks import GWWork, SingleAbinitGWWork, VaspGWFWWorkFlow
 from abipy.flowtk import Flow, ScfTask, NscfTask, SigmaTask
 from pymatgen.io.abinit.tasks import ScrTask  # this does not import via flowtk
+from pymatgen import SETTINGS
+
+POTCAR_DIR = SETTINGS.get("VASP_PSP_DIR")
 
 # TODO: These tests produce several files. The execution of the test should be done in a temp directory.
 
-
 __author__ = 'setten'
-
-from pymatgen import SETTINGS
-POTCAR_DIR = SETTINGS.get("VASP_PSP_DIR")
 
 
 class GWSpecTest(AbipyTest):
@@ -88,7 +87,8 @@ class GWConvergenceDataTest(AbipyTest):
         self.assertEqual(conv_data.full_res, {u'all_done': True, u'grid': 0})
         string = "{'control': {u'ecuteps': True, u'nbands': True, u'ecut': True}, " \
                  "'values': {u'ecuteps': 101.98825, u'nbands': 30.0, u'ecut': 326.53663224759407, u'gap': 3.13196}, " \
-                 "'derivatives': {u'ecuteps': 0.00023077744572658418, u'nbands': -0.0013567555555555532, u'ecut': 0.16666666666665808}}"
+                 "'derivatives': {u'ecuteps': 0.00023077744572658418, " \
+                 "u'nbands': -0.0013567555555555532, u'ecut': 0.16666666666665808}}"
         with open(test_file, 'w') as f:
             f.write(string)
         conv_data.read_conv_res_from_file(test_file)
@@ -120,7 +120,7 @@ class GWConvergenceDataTest(AbipyTest):
         print(conv_data.conv_res)
         self.assertEqual(conv_data.conv_res['control'], conv_res['control'])
         self.assertEqual(conv_data.conv_res['derivatives'], conv_res['derivatives'])
-        #self.assertEqual(conv_data.conv_res['values'], conv_res['values'])
+        # self.assertEqual(conv_data.conv_res['values'], conv_res['values'])
         for k in conv_data.conv_res['values']:
             self.assert_almost_equal(conv_data.conv_res["values"][k], conv_res['values'][k], decimal=4)
 
@@ -204,8 +204,7 @@ class GWVaspInputSetTests(AbipyTest):
         """
         inpset = GWG0W0VaspInputSet(structure=self.structure, spec=self.spec)
         self.assertIsInstance(inpset, GWG0W0VaspInputSet)
-        self.assertEqual(inpset.convs,
-                         {u'ENCUTGW': {u'test_range': (200, 400, 600, 800), u'control': u'gap', u'method': u'incar_settings'}})
+        self.assertEqual(inpset.convs, {u'ENCUTGW': {u'test_range': (200, 400, 600, 800), u'control': u'gap', u'method': u'incar_settings'}})
 
     def test_SingleVaspGWWork(self):
         """
@@ -263,7 +262,6 @@ class GWworksTests(AbipyTest):
         struc.item = 'test'
 
         wdir = tempfile.mkdtemp()
-        #wdir = '.'
         shutil.copyfile(abidata.cif_file("si.cif"), os.path.join(wdir, 'si.cif'))
         shutil.copyfile(abidata.pseudo("14si.pspnc").path, os.path.join(wdir, 'Si.pspnc'))
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'shell_nompi_manager.yml'),
@@ -349,8 +347,8 @@ class GWworksTests(AbipyTest):
         ecuteps = [dict(task.input.as_dict()['abi_args']).get('ecuteps', None) for task in flow[0]]
         print('ecuteps:', ecuteps)
         self.assertEqual(ecuteps, [None, None, None, None, None, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 12,
-                                    12, 12, 12, 12, 12, 12, 12, 16, 16, 16, 16, 16, 16, 16, 16, 20, 20, 20, 20, 20, 20,
-                                    20, 20])
+                                   12, 12, 12, 12, 12, 12, 12, 16, 16, 16, 16, 16, 16, 16, 16, 20, 20, 20, 20, 20, 20,
+                                   20, 20])
 
         inplens = [len(task.input.as_dict()['abi_args']) for task in flow[0]]
         print(inplens)
