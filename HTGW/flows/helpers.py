@@ -10,7 +10,6 @@ Helper methods for generating gw input / and work flows.
 
 import time
 import os
-import ast
 import copy
 import math
 import shutil
@@ -40,7 +39,6 @@ def read_extra_abivars():
     ea = {}
     if os.path.isfile('extra_abivars'):
         with open('extra_abivars') as f:
-#        ea = ast.literal_eval(f.read())
             ea = json.load(fp=f)
         if not isinstance(ea, dict):
             raise RuntimeError
@@ -141,9 +139,8 @@ def read_grid_from_file(filename):
     Read the results of a full set of calculations from file
     """
     try:
-        f = open(filename, mode='r')
-        full_res = ast.literal_eval(f.read())
-        f.close()
+        with open(filename, mode='r') as f:
+            full_res = json.load(f)
     except SyntaxError:
         print('Problems reading ', filename)
         full_res = {'grid': 0, 'all_done': False}
@@ -156,9 +153,8 @@ def is_converged(hartree_parameters, structure, return_values=False):
     filename = s_name(structure) + ".conv_res"
     to_return = {}
     try:
-        f = open(filename, mode='r')
-        conv_res = ast.literal_eval(f.read())
-        f.close()
+        with open(filename, mode='r') as f:
+            conv_res = json.load(f)
         converged = True if True in conv_res['control'].values() else False
     except (IOError, OSError, ValueError):
         if return_values:

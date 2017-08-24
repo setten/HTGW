@@ -8,7 +8,7 @@ import json
 from abipy.abilab import Structure as AbiStructure
 from pymatgen.util.testing import PymatgenTest
 from pymatgen.core.structure import Structure
-from HTGW.flows.helpers import clean, read_extra_abivars, expand
+from HTGW.flows.helpers import clean, read_extra_abivars, expand, read_grid_from_file, is_converged
 import abipy.data as abidata
 from HTGW.flows.datastructures import get_spec
 from HTGW.flows.GWworks import SingleAbinitGWWork
@@ -42,6 +42,36 @@ structure = Structure.from_dict(structure_dict)
 
 
 class GWTestHelpers(PymatgenTest):
+
+    def test_is_converged(self):
+        """
+        Testing the reading conv_res file for convergence
+        """
+        # no file case
+        self.assertEqual(is_converged(hartree_parameters=True, structure=structure, return_values=False), False)
+
+        is_converged(hartree_parameters=True, structure=structure, return_values=True)
+
+        is_converged(hartree_parameters=False, structure=structure, return_values=False)
+
+        is_converged(hartree_parameters=False, structure=structure, return_values=True)
+
+
+
+    def test_read_grid_from_file(self):
+        """
+        Testing the reading the results of a full set of calculations from file
+        """
+        # no full res file case
+        full_res_read = read_grid_from_file('full_res')
+        self.assertEqual(full_res_read, {'grid': 0, 'all_done': False})
+
+        # file there done case
+        full_res = {'grid': 2, 'all_done': True}
+        with open('full_res', 'w') as f:
+            json.dump(obj=full_res, fp=f)
+        full_res_read = read_grid_from_file('full_res')
+        self.assertEqual(full_res_read, full_res)
 
     def test_clean(self):
         """
