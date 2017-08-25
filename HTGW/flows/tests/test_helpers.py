@@ -48,15 +48,21 @@ class GWTestHelpers(PymatgenTest):
         Testing the reading conv_res file for convergence
         """
         # no file case
-        self.assertEqual(is_converged(hartree_parameters=True, structure=structure, return_values=False), False)
+        self.assertFalse(is_converged(hartree_parameters=True, structure=structure, return_values=False))
 
-        is_converged(hartree_parameters=True, structure=structure, return_values=True)
+        rc = {'control': {u'ecuteps': True, u'ecut': True, u'nbands': True},
+              'values': {u'ecuteps': 101.98825069084282, u'ecut': 1306.1464252800001, u'nscf_nbands': 30},
+              'derivatives': {u'ecuteps': 0.00023073134391802955, u'ecut': -0.32831958027186586, u'nbands': -0.0013564443499111344}}
 
-        is_converged(hartree_parameters=False, structure=structure, return_values=False)
+        with open('Si_mp-149.conv_res', 'w') as f:
+            json.dump(obj=rc, fp=f)
 
-        is_converged(hartree_parameters=False, structure=structure, return_values=True)
+        # file reading
+        self.assertEqual(is_converged(hartree_parameters=True, structure=structure, return_values=True),
+                         {u'nscf_nbands': 30, u'ecut': 48.0, u'ecuteps': 4.0})
 
-
+        self.assertEqual(is_converged(hartree_parameters=False, structure=structure, return_values=True),
+                         {u'ecut': 1306.1464252800001, u'ecuteps': 101.98825069084282, u'nscf_nbands': 30})
 
     def test_read_grid_from_file(self):
         """
