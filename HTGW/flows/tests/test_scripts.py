@@ -40,7 +40,6 @@ class GWSetupTest(AbipyTest):
         self.assert_equal(spec_in.hash_str(), "code:ABINIT;source:cifjobs:[u'prep', u'G0W0'];mode:ceci;functional:PBE;kp_grid_dens:500prec:m;tol:0.0001;test:False;converge:False")
 
         wdir = tempfile.mkdtemp()
-        base = os.getcwd()
         print('wdir', wdir)
 
         os.chdir(wdir)
@@ -66,17 +65,25 @@ class GWSetupTest(AbipyTest):
         spec_in.write_to_file('spec.in')
         self.assertTrue(os.path.isfile(os.path.join(wdir, 'spec.in')))
 
-
-        # broken due to strategy refactoring
-        # spec_in.loop_structures('i')
-
-        os.chdir(base)
-
-        shutil.rmtree(wdir)
+        spec_in.loop_structures('i')
 
         if temp_ABINIT_PS is not None:
             os.environ['ABINIT_PS_EXT'] = temp_ABINIT_PS_EXT
             os.environ['ABINIT_PS'] = temp_ABINIT_PS
+
+        ls = os.listdir('.')
+        print(ls)
+        self.assertEqual(ls, [u'job_collection', u'manager.yml', u'scheduler.yml', u'si.cif', u'Si.pspnc',
+                              u'Si_si.cif', u'spec.in'])
+
+        ls2 = os.listdir('Si_si.cif/')
+        print(ls2)
+        self.assertEqual(ls2, [u'.nodeid', u'__AbinitFlow__.pickle', u'indata', u'outdata', u'tmpdata', u'w0'])
+
+        ls3 = os.listdir('Si_si.cif/w0/')
+        print(ls3)
+        self.assertEqual(ls3, [u'indata', u'outdata', u't0', u't1', u't2', u't3', u'tmpdata'])
+
 
 
         # test the folder structure

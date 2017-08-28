@@ -5,7 +5,6 @@ import os
 import stat
 import os.path
 import json
-import pymatgen as pmg
 import copy
 import six
 try:
@@ -18,7 +17,7 @@ from monty.json import MSONable
 from pymatgen.io.vasp.inputs import Poscar
 from pymatgen.matproj.rest import MPRester, MPRestError
 from pymatgen.util.convergence import determine_convergence
-from HTGW.flows.helpers import print_gnuplot_header, s_name, add_gg_gap, refine_structure, read_extra_abivars
+from HTGW.flows.helpers import print_gnuplot_header, s_name, add_gg_gap, refine_structure
 from pymatgen.core.structure import Structure
 from pymatgen.core.units import eV_to_Ha
 from HTGW.flows.codeinterfaces import get_code_interface
@@ -80,9 +79,8 @@ class AbstractAbInitioSpec(MSONable):
         return self['code']
 
     def write_to_file(self, filename):
-        f = open(filename, mode='w')
-        f.write(str(self.to_dict()))
-        f.close()
+        with open(filename, mode='w') as f:
+            json.dump(obj=self.to_dict(), fp=f)
 
     def read_from_file(self, filename):
         try:
@@ -187,7 +185,7 @@ class AbstractAbInitioSpec(MSONable):
                 structure.item = item['name']
             else:
                 if item.startswith('POSCAR_'):
-                    structure = pmg.read_structure(item)
+                    structure = structure.from_file(item)
                     comment = Poscar.from_file(item).comment
                     # print comment
                     if comment.startswith("gap"):
