@@ -4,7 +4,7 @@ from __future__ import unicode_literals, division, print_function
 import os
 import stat
 import os.path
-import ast
+import json
 import pymatgen as pmg
 import copy
 import six
@@ -86,9 +86,8 @@ class AbstractAbInitioSpec(MSONable):
 
     def read_from_file(self, filename):
         try:
-            f = open(filename, mode='r')
-            self.data = ast.literal_eval(f.read())
-            f.close()
+            with open(filename, mode='r') as f:
+                self.data = json.load(f)
         except OSError:
             print('Inputfile ', filename, ' not found exiting.')
             exit()
@@ -535,9 +534,8 @@ class GWSpecs(AbstractAbInitioSpec):
         success = data.read_conv_res_from_file(os.path.join(s_name(structure)+'.res', s_name(structure)+'.conv_res'))
         con_dat = self.code_interface.read_convergence_data(s_name(structure)+'.res')
         try:
-            f = open('extra_abivars', mode='r')
-            extra = ast.literal_eval(f.read())
-            f.close()
+            with open('extra_abivars', mode='r') as f:
+                extra = json.load(fp=f)
         except (OSError, IOError):
             extra = None
         ps = self.code_interface.read_ps_dir()
@@ -665,11 +663,10 @@ class GWConvergenceData(object):
         print('reading')
         success = False
         try:
-            f = open(filename, mode='r')
-            self.conv_res = ast.literal_eval(f.read())
-            f.close()
+            with open(filename, mode='r') as f:
+                self.conv_res = json.load(fp=f)
             success = True
-            print(self.conv_res)
+            print(json.dumps(self.conv_res, indent=2))
         except SyntaxError:
             print('Problems reading ', filename)
         except (OSError, IOError):
@@ -683,9 +680,8 @@ class GWConvergenceData(object):
         filename = self.name+'.full_res'
         success = False
         try:
-            f = open(filename, mode='r')
-            self.full_res = ast.literal_eval(f.read())
-            f.close()
+            with open(filename, mode='r') as f:
+                self.full_res = json.load(fp=f)
             success = True
         except SyntaxError:
             print('Problems reading ', filename)

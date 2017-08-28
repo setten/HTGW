@@ -14,10 +14,9 @@ import time as time
 from plots import ConvTest
 from my_abiobjects import MySigResFile, MyBandsFile
 from pymatgen.matproj.rest import MPRester, MPRestError
-from pymatgen.io.abinit.netcdf import NetcdfReaderError
+from abipy.flowtk.netcdf import NetcdfReaderError
 from pymatgen.util.convergence import determine_convergence
-from abipy.gw.datastructures import GWConvergenceData
-import pprint
+from HTGW.flows.datastructures import GWConvergenceData
 from gridfs.errors import NoFile
 from abipy.abilab import abiopen, ElectronBandsPlotter
 from pymongo.errors import CursorNotFound

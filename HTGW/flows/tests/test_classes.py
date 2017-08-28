@@ -9,6 +9,7 @@ import unittest
 import shutil
 import os
 import tempfile
+import json
 import abipy.data as abidata
 import copy
 
@@ -78,19 +79,18 @@ class GWConvergenceDataTest(AbipyTest):
         self.assertEqual(conv_data.name, 'Si_mp-149')
         self.assertEqual(conv_data.conv_res, {u'control': {}, u'derivatives': {}, u'values': {}})
         test_file = tempfile.mktemp()
-        string = "{u'grid': 0, u'all_done': True}"
+        full_res = {u"grid": 0, u"all_done": True}
         f_name = conv_data.name+'.full_res'
         with open(f_name, 'w') as f:
-            f.write(string)
+            json.dump(obj=full_res, fp=f)
         conv_data.read_full_res_from_file()
         os.remove(f_name)
-        self.assertEqual(conv_data.full_res, {u'all_done': True, u'grid': 0})
-        string = "{'control': {u'ecuteps': True, u'nbands': True, u'ecut': True}, " \
-                 "'values': {u'ecuteps': 101.98825, u'nbands': 30.0, u'ecut': 326.53663224759407, u'gap': 3.13196}, " \
-                 "'derivatives': {u'ecuteps': 0.00023077744572658418, " \
-                 "u'nbands': -0.0013567555555555532, u'ecut': 0.16666666666665808}}"
+        self.assertEqual(conv_data.full_res, {'all_done': True, 'grid': 0})
+        conv_res = {'control': {'ecuteps': True, 'nbands': True, 'ecut': True},
+                    'values': {'ecuteps': 101.98825, 'nbands': 30.0, 'ecut': 326.53663224759407, 'gap': 3.13196},
+                    'derivatives': {'ecuteps': 0.00023077744572658418, 'nbands': -0.0013567555555555532, 'ecut': 0.16666666666665808}}
         with open(test_file, 'w') as f:
-            f.write(string)
+            json.dump(obj=conv_res, fp=f)
         conv_data.read_conv_res_from_file(test_file)
         self.assertEqual(conv_data.conv_res['values']['nbands'], 30)
         self.assertEqual(conv_data.conv_res['derivatives']['ecuteps'], 0.00023077744572658418)

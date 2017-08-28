@@ -27,6 +27,7 @@ labels = {'nbands': "Number of bands",
                         'scissor_residues0': "scissor residues (eV)",
                         'scissor_residues1': "scissor residues (eV)"}
 
+
 class MyPlotStyle(object):
     """
     base clase for plots setting visual settings
