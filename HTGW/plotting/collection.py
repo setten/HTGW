@@ -1,11 +1,4 @@
 from __future__ import print_function, division
-
-__author__ = 'setten'
-__version__ = "0.1"
-__maintainer__ = "Michiel van Setten"
-__email__ = "mjvansetten@gmail.com"
-__date__ = "Sept 2014"
-
 import os
 import sys
 import pymongo
@@ -16,10 +9,16 @@ from my_abiobjects import MySigResFile, MyBandsFile
 from pymatgen.matproj.rest import MPRester, MPRestError
 from abipy.flowtk.netcdf import NetcdfReaderError
 from pymatgen.util.convergence import determine_convergence
-from HTGW.flows.datastructures import GWConvergenceData
 from gridfs.errors import NoFile
-from abipy.abilab import abiopen, ElectronBandsPlotter
+from abipy.abilab import ElectronBandsPlotter
 from pymongo.errors import CursorNotFound
+
+
+__author__ = 'setten'
+__version__ = "0.1"
+__maintainer__ = "Michiel van Setten"
+__email__ = "mjvansetten@gmail.com"
+__date__ = "Sept 2014"
 
 
 class Collection(object):
@@ -34,11 +33,6 @@ class Collection(object):
         self.data_set = []
         self.col, self.gfs = self.get_collection()
         self.col_external = self.get_collection(db_name='band_gaps', collection=None)
-
-#local_serv = pymongo.Connection("marilyn.pcpm.ucl.ac.be")
-#local_db_gaps = local_serv.band_gaps
-#pwd = os.environ['MAR_PAS']
-#local_db_gaps.authenticate("setten", pwd)
 
     def get_collection(self, server="marilyn.pcpm.ucl.ac.be", db_name="GW_results", collection="general"):
         """
@@ -70,7 +64,6 @@ class Collection(object):
             return db
         else:
             return db[collection], gridfs.GridFS(db)
-
 
     @property
     def total_entries(self):
@@ -132,21 +125,21 @@ class Collection(object):
 
     def get_property_lists(self, query=None, exclude=None):
         """
-        add the propperty lists the object as:
+        add the property lists the object as:
 
         self.systems : a list of systems that occur in the collection
         self.functionals : a list of occuring functionals
         self.ps : a list of occuring pseudos
-        self.extra : a list of occuring extra parameres
+        self.extra : a list of occuring extra parameters
         """
         if query is None:
             query = {}
         if exclude is None:
             exclude = []
         for item in self.col.find(query):
-            sys = item['system'].split('_')[0]
-            if sys not in self.systems and sys not in exclude:
-                self.systems.append(sys)
+            system = item['system'].split('_')[0]
+            if system not in self.systems and system not in exclude:
+                self.systems.append(system)
             ps = item['ps'].split('/')[-2]
             if ps not in self.ps and ps not in exclude:
                 self.ps.append(ps)
@@ -167,13 +160,11 @@ class Collection(object):
         print("Pseudos:\n %s\n" % self.ps)
         print("Extra vars:\n %s" % self.extra)
 
-    def get_data_set(self, query=None, sigresdata=False, get_exp=False, update=False):
+    def get_data_set(self, query=None, sigresdata=False, update=False):
         """
         method to retrieve a data set from database
         """
         self.data_set = []
-        #print('retreiving data:')
-        #print(query)
         if sigresdata:
             print('may need to parse nc files, this may take some time')
         if query is None:
@@ -246,13 +237,11 @@ class Collection(object):
                     if item['system'] not in []:
                         print('bands for', item['system'])
                         try:
-                            #if 'gwbgap' not in item['bs_data'].keys():
                             if item['bs_data']['gwbgap'] is None:
                                 raise KeyError
                             entry['data'].update(item['bs_data'])
                             sys.stdout.write(".")
                             sys.stdout.flush()
-                            #raise KeyError
                         except KeyError:
                             try:
                                 t0 = time.time()
@@ -281,7 +270,7 @@ class Collection(object):
                                 t = time.time() - t0
                                 print('making updating : %s' % t)
                                 print('got ksbandsdata')
-                            except (NoFile, KeyError, ValueError, KeyboardInterrupt): # (KeyError, NoFile, NetcdfReaderError, ValueError):
+                            except (NoFile, KeyError, ValueError, KeyboardInterrupt):
                                 print('failed getting ksbandsdata')
                                 bs_data = {'ksbgap': None,
                                            'ksbhomo': None,
@@ -289,15 +278,6 @@ class Collection(object):
                                            'gwblumo': None,
                                            'ksblumo': None,
                                            'gwbgap': None}
-                            #else:
-                            #    print('in else', item['system'])
-                            #    bs_data = {'ksbgap': 0,
-                            #                'ksbhomo': 0,
-                            #                'gwbhomo': 0,
-                            #                'gwblumo': 0,
-                            #                'ksblumo': 0,
-                            #                'gwbgap': 0}
-                            #    entry['data'].update(bs_data)
                             item['bs_data'] = bs_data
                             self.col.save(item)
 
@@ -334,7 +314,6 @@ class Collection(object):
         if query is None:
             query = {}
         for item in self.col.find(query):
-            #gw_conv_data = GWConvergenceData(spec={'code': 'ABINIT'}, structure=None)
             if not silent:
                 print('System    : ', item['system'])
                 print('Ps        : ', item['ps'])
@@ -360,8 +339,6 @@ class Collection(object):
                             if abs(float(line.split()[0]) - item['gw_results']['nbands']) < 20:
                                 xx.append(float(line.split()[1]))
                                 yy.append(float(line.split()[2]))
-                    #print(xx)
-                    #print(yy)
                     tol = 0.05
                     convres = determine_convergence(xs=xx, ys=yy, name='test', tol=-tol)
                     n = convres[3]
@@ -382,7 +359,6 @@ class Collection(object):
                     ecuteps_interpol = ecuteps_interpol if ecuteps_interpol < 500000 else None
                     item['gw_results']['ecuteps_interpol'] = ecuteps_interpol
                     print('interpolated ecuteps: %s' % ecuteps_interpol)
-                    #print(item)
                     self.col.save(item)
                     if title is None:
                         t = item['system']
@@ -393,11 +369,9 @@ class Collection(object):
                         p.show()
                     except ValueError:
                         print('bad data')
-                        dummy = raw_input('next')
 
             except (KeyError, NoFile):
                 print('no convergence plot in DataBase')
-                #dummy = raw_input('next')
 
         return p.return_fig_ax()
 
@@ -442,7 +416,6 @@ class Collection(object):
                         pass
             except IOError:
                 print('No Sigres file in DataBase')
-                dummy = raw_input('next')
 
         try:
             return fig
@@ -469,11 +442,11 @@ class Collection(object):
                 print('extra     : ', item['extra_vars'])
                 print('gwresults : ', item['gw_results'])
             try:
-                #print('data  : ', item['results_file'])
                 data = self.gfs.get(item['results_file']).read()
                 if len(data) > 1000:
                     srf = MySigResFile(data)
-                    title = "QPState corrections of " + str(item['system']) + "\nusing " + str(item['ps'].split('/')[-2])
+                    title = "QPState corrections of " + str(item['system']) + "\nusing " \
+                            + str(item['ps'].split('/')[-2])
                     if item['extra_vars'] is not None:
                         title += ' and ' + str(self.fix_extra(item['extra_vars']))
                     srf.plot_scissor(title=title)
@@ -491,14 +464,8 @@ class Collection(object):
 
                     plotter.add_ebands("KS+scissors(e)", qpb)
 
-                    # Define the mapping reduced_coordinates -> name of the k-point.
-                    #klabels = {
-                    #    (0.5,  0.0,  0.0): "L",
-                    #    (0.0,  0.0,  0.0): "$\Gamma$",
-                    #    (0.0,  0.5,  0.5): "X",
-                    #}
-
-                    fig = plotter.plot(align='cbm', ylim=(-5, 10), title="%s Bandstructure" % item['system'].split('_mp-')[0])
+                    fig = plotter.plot(align='cbm', ylim=(-5, 10), title="%s Bandstructure" %
+                                                                         item['system'].split('_mp-')[0])
 
                     try:
                         if not item['tgwgap']:
@@ -515,7 +482,6 @@ class Collection(object):
                         pass
             except (KeyError, IOError, NoFile):
                 print('No Sigres file in DataBase')
-                #dummy = raw_input('next')
 
         try:
             return fig
@@ -542,7 +508,6 @@ class Collection(object):
             if 'mp-' in item['item']:
                 try:
                     with MPRester(mp_key) as mp_database:
-                        #print 'structure from mp database', item['item']
                         gap = {}
                         bandstructure = mp_database.get_bandstructure_by_material_id(item['item'])
                         gap['vbm_l'] = bandstructure.kpoints[bandstructure.get_vbm()['kpoint_index'][0]].label
@@ -566,4 +531,3 @@ class Collection(object):
                     srf.print_gap_info()
             except IOError:
                 print('No Sigres file in DataBase')
-                dummy = raw_input('next')

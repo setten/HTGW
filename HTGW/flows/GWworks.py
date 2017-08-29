@@ -10,6 +10,21 @@ Under construction:
 
 """
 
+import os.path
+import copy
+import json
+from abipy.flowtk.flows import Flow
+from abipy.flowtk.tasks import TaskManager
+from HTGW.flows.helpers import now, s_name, expand, read_grid_from_file, is_converged
+from HTGW.flows.helpers import read_extra_abivars
+from HTGW.flows.GWtasks import *
+from abipy.abio.factories import g0w0_convergence_inputs
+
+# to move to flowtk?
+from pymatgen.io.abinit.works import G0W0Work
+from pymatgen.io.abinit.pseudos import PseudoTable
+
+
 __author__ = "Michiel van Setten"
 __copyright__ = " "
 __version__ = "0.9"
@@ -17,17 +32,6 @@ __maintainer__ = "Michiel van Setten"
 __email__ = "mjvansetten@gmail.com"
 __date__ = "May 2014"
 
-import os.path
-import copy
-from pymatgen.io.abinit.flows import Flow
-# from pymatgen.io.abinitio.calculations import g0w0_extended_work
-from pymatgen.io.abinit.tasks import TaskManager
-from pymatgen.io.abinit.pseudos import PseudoTable
-from HTGW.flows.helpers import now, s_name, expand, read_grid_from_file, is_converged
-from HTGW.flows.helpers import read_extra_abivars
-from HTGW.flows.GWtasks import *
-from abipy.abio.factories import g0w0_convergence_inputs
-from pymatgen.io.abinit.works import G0W0Work
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger(__name__)
@@ -230,11 +234,13 @@ class SingleAbinitGWWork:
         manager = TaskManager.from_user_config()
         # Initialize the flow.
         flow = Flow(self.work_dir, manager, pickle_protocol=0)
-        # flow = Flow(self.work_dir, manager)
         # kpoint grid defined over density 40 > ~ 3 3 3
         if self.spec['converge'] and not self.all_converged:
             # (2x2x2) gamma centered mesh for the convergence test on nbands and ecuteps
             # if kp_in is present in the specs a kp_in X kp_in x kp_in mesh is used for the convergence study
+            print('== here ===')
+            print(self.spec.__class__)
+            json.dumps(self.spec.data, indent=2)
             if 'kp_in' in self.spec.data.keys():
                 if self.spec['kp_in'] > 9:
                     print('WARNING:\nkp_in should be < 13 to generate an n x n x n mesh\nfor larger values a grid with '
@@ -355,7 +361,7 @@ class SingleAbinitGWWork:
         logger.info('nscf_nb : %s ' % str(nscf_nband))
         inputs = g0w0_convergence_inputs(abi_structure, self.pseudo_table, kppa, nscf_nband, ecuteps, ecutsigx,
                                          scf_nband, ecut, accuracy="normal", spin_mode="unpolarized", smearing=None,
-                                         response_models=response_models, charge=0.0,
+                                         response_models=response_models, charge=0.0, gw_qprange=2,
                                          gamma=gamma, nksmall=nksmall, extra_abivars=extra_abivars)
 
         work = G0W0Work(scf_inputs=inputs[0], nscf_inputs=inputs[1], scr_inputs=inputs[2], sigma_inputs=inputs[3])

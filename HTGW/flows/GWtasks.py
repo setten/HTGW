@@ -5,14 +5,6 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 GW tasks for fireworks workflows, currently Vasp only
 """
 
-
-__author__ = "Michiel van Setten"
-__copyright__ = " "
-__version__ = "0.9"
-__maintainer__ = "Michiel van Setten"
-__email__ = "mjvansetten@gmail.com"
-__date__ = "May 2014"
-
 import os
 import os.path
 import logging
@@ -28,9 +20,22 @@ try:
     from fireworks.utilities.fw_serializers import FWSerializable
 except ImportError:
     # Dummy classes 
-    class FireTaskBase(object): pass
-    class FWAction(object): pass
-    class FWSerializable(object): pass
+    class FireTaskBase(object):
+        pass
+
+    class FWAction(object):
+        pass
+
+    class FWSerializable(object):
+        pass
+
+
+__author__ = "Michiel van Setten"
+__copyright__ = " "
+__version__ = "0.9"
+__maintainer__ = "Michiel van Setten"
+__email__ = "mjvansetten@gmail.com"
+__date__ = "May 2014"
 
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))

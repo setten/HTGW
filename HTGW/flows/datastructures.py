@@ -64,7 +64,7 @@ class AbstractAbInitioSpec(MSONable):
         return self.data[item]
 
     def as_dict(self):
-        return self.to_dict
+        return self.to_dict()
 
     @abstractmethod
     def to_dict(self):
@@ -216,7 +216,28 @@ class AbstractAbInitioSpec(MSONable):
                     continue
                 structure.kpts = [list(structure.cbm), list(structure.vbm)]
                 structure.item = item
+
             print(item, s_name(structure))
+
+            modes = {'i': {'action': self.execute_flow, 'fail_msg': 'input generation failed'},
+                     'w': {'action': self.print_results, 'fail_msg': 'writing output failed'},
+                     's': {'action': self.insert_in_database, 'fail_msg': 'database insertion failed'},
+                     'o': {'action': self.process_data, 'fail_msg': 'output parsing failed'}
+                     }
+
+            ok, not_ok = 0, 0
+            errors = {}
+
+            try:
+                action = modes[mode]['action']
+                action(structure)
+                ok += 1
+            except Exception as exc:
+                print('%s\n%s' % (modes[mode]['fail_msg'], exc))
+                not_ok += 1
+                errors[s_name(structure)] = exc.message
+
+            """
             if mode == 'i':
                 try:
                     self.execute_flow(structure)
@@ -226,26 +247,32 @@ class AbstractAbInitioSpec(MSONable):
             elif mode == 'w':
                 try:
                     self.print_results(structure)
-                except:
+                except Exception as exc:
                     print('writing output failed')
+                    print(exc)
             elif mode == 's':
                 try:
                     self.insert_in_database(structure)
-                except:
+                except Exception as exc:
                     print('database insertion failed')
+                    print(exc)
             elif mode == 'o':
-                # if os.path.isdir(s_name(structure)) or os.path.isdir(s_name(structure)+'.conv'):
                 try:
                     self.process_data(structure)
-                except:
+                except Exception as exc:
                     print('output parsing failed')
+                    print(exc)
+            """
 
         if 'ceci' in self.data['mode'] and mode == 'i':
             os.chmod("job_collection", stat.S_IRWXU)
 
+        return ok, not_ok, errors
+
     def reset_job_collection(self):
         if 'ceci' in self.data['mode'] and os.path.isfile('job_collection'):
             os.remove('job_collection')
+
 
     @abstractproperty
     def help(self):
@@ -390,7 +417,7 @@ class GWSpecs(AbstractAbInitioSpec):
         execute spec prepare input/jobfiles or submit to fw for a given structure and the given code interface
         """
         # todo the mode should actually be handled here... and not inside the code interface
-        self.code_interface.execute_flow(structure, self.data)
+        self.code_interface.execute_flow(structure, self)
 
     def process_data(self, structure):
         """
@@ -413,6 +440,7 @@ class GWSpecs(AbstractAbInitioSpec):
                 pass
 
             data.set_type()
+
             while not done:
                 if data.type['parm_scr']:
                     data.read()
@@ -507,13 +535,16 @@ class GWSpecs(AbstractAbInitioSpec):
 
     def print_results(self, structure, file_name='convergence_results'):
         """
+        print a summary of the convergence results to file
         """
         data = GWConvergenceData(spec=self, structure=structure)
+        nodata = False
         if data.read_conv_res_from_file(os.path.join(s_name(structure)+'.res', s_name(structure)+'.conv_res')):
             s = '%s %s %s ' % (s_name(structure), str(data.conv_res['values']['ecuteps']), str(data.conv_res['values']
                                                                                                ['nscf_nbands']))
         else:
             s = '%s 0.0 0.0 ' % s_name(structure)
+            nodata = True
         con_dat = self.code_interface.read_convergence_data(s_name(structure)+'.res')
         if con_dat is not None:
             s += '%s ' % con_dat['gwgap']
@@ -523,6 +554,8 @@ class GWSpecs(AbstractAbInitioSpec):
         f = open(file_name, 'a')
         f.write(str(s))
         f.close()
+        if nodata:
+            raise RuntimeError('no convergence data found')
 
     def insert_in_database(self, structure, clean_on_ok=False, db_name='GW_results', collection='general'):
         """
@@ -632,6 +665,8 @@ class GWSpecs(AbstractAbInitioSpec):
             else:
                 print('duplicate entry ... ')
             local_serv.disconnect()
+        else:
+            raise RuntimeError('no data found to insert in db')
             # end generic section
 
             # todo remove the workfolders
@@ -733,6 +768,10 @@ class GWConvergenceData(object):
             self.type['test'] = True
         else:
             self.type['single'] = True
+
+        if True not in self.type.values():
+            raise RuntimeError('calculation stage could not be determined for convergence calculation')
+
         print(self.type)
 
     def find_conv_pars(self, tol=0.0001, silent=False):

@@ -1,15 +1,14 @@
 from __future__ import print_function, division
+from abipy.electrons.gw import SigresFile
+from abipy.electrons.gsr import GsrFile
+import sys
+import os
 
 __author__ = 'setten'
 __version__ = "0.1"
 __maintainer__ = "Michiel van Setten"
 __email__ = "mjvansetten@gmail.com"
 __date__ = "Sept 2014"
-
-from abipy.electrons.gw import SigresFile
-from abipy.electrons.gsr import GsrFile
-import sys
-import os
 
 
 # Disable
@@ -26,8 +25,9 @@ class MyBandsFile(object):
     """
     container for a GSR file with some additional stuff
     """
-    def __init__(self, data):
-        #block_print()
+    def __init__(self, data, silent=False):
+        if silent:
+            block_print()
         name = 'tmp_GSR.nc'
         f = open(name, 'w')
         f.write(data)
@@ -45,15 +45,17 @@ class MyBandsFile(object):
         self.homo_b = self.ebands.homos[0].band
         self.homo_s = self.ebands.homos[0].spin
         self.en_max_band = self.ebands.enemax()
-        #enable_print()
+        if silent:
+            enable_print()
 
 
 class MySigResFile(object):
     """
     container for a sigres file with some additional stuff ..
     """
-    def __init__(self, data):
-        #block_print()
+    def __init__(self, data, silent=False):
+        if silent:
+            block_print()
         name = 'tmp_SIGRES.nc'
         f = open(name, 'w')
         f.write(data)
@@ -72,7 +74,7 @@ class MySigResFile(object):
         self.homo_b = self.ebands.homos[0].band
         self.homo_s = self.ebands.homos[0].spin
         self.en_max_band = self.ebands.enemax()
-        #self.qplist_spin = sigma_file.qplist_spin
+        # self.qplist_spin = sigma_file.qplist_spin
         qpe = self.qplist_spin[0].get_field('qpe')
         self.lumo_gw = self.qplist_spin[0].get_value((self.lumo_s, self.lumo_kp, self.lumo_b), 'qpe').real
         self.homo_gw = self.qplist_spin[0].get_value((self.homo_s, self.homo_kp, self.homo_b), 'qpe').real
@@ -82,7 +84,8 @@ class MySigResFile(object):
         self.lower = min(min(qpe).real, min(e0)) - 1
         self.upper = max(max(qpe).real, max(e0)) + 1
         self.scissor_residues = self.get_scissor_residues()
-        #enable_print()
+        if silent:
+            enable_print()
         sigma_file.close()
 
     def get_scissor(self):

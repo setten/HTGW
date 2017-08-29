@@ -352,9 +352,9 @@ class GWworksTests(AbipyTest):
 
         inplens = [len(task.input.as_dict()['abi_args']) for task in flow[0]]
         print(inplens)
-        self.assertEqual(inplens, [17, 17, 17, 17, 18, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30,
-                                   27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27, 30, 27,
-                                   30, 27, 30])
+        self.assertEqual(inplens, [17, 17, 17, 17, 18, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30,
+                                   28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28,
+                                   30, 28, 30])
 
         ngkpts = [dict(task.input.as_dict()['abi_args'])['ngkpt'] for task in flow[0]]
 

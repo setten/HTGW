@@ -1,5 +1,10 @@
 from __future__ import division
 from __future__ import print_function, division
+import matplotlib.pyplot as plt
+from operator import add
+from matplotlib import cm
+import numpy as np
+
 
 __author__ = 'setten'
 __version__ = "0.1"
@@ -7,31 +12,27 @@ __maintainer__ = "Michiel van Setten"
 __email__ = "mjvansetten@gmail.com"
 __date__ = "Sept 2014"
 
-import matplotlib.pyplot as plt
-from operator import add
-from mpl_toolkits.mplot3d import axes3d
-from matplotlib import cm
-import numpy as np
 
 colors = ['r', 'g', 'b', 'y', 'm', 'c', 'k', 'k', 'k', 'k', 'k', 'k', 'k', 'k']
 
 labels = {'nbands': "Number of bands",
-          'gwgap' : "GW gap @ Gamma (eV)",
-                        'ecuteps': "ecuteps (eV)",
-                        'gwfgap': "Fundamental GW gap (eV)",
-                        'ksfgap': "Fundamental KS gap (eV)",
-                        'gwhomo': "GW HOMO (eV)",
-                        'kshomo': "KS HOMO (eV)",
-                        'gwlumo': "GW LUMO (eV)",
-                        'kslumo': "KS LUMO (eV)",
-                        'scissor_residues0': "scissor residues (eV)",
-                        'scissor_residues1': "scissor residues (eV)"}
+          'gwgap': "GW gap @ Gamma (eV)",
+          'ecuteps': "ecuteps (eV)",
+          'gwfgap': "Fundamental GW gap (eV)",
+          'ksfgap': "Fundamental KS gap (eV)",
+          'gwhomo': "GW HOMO (eV)",
+          'kshomo': "KS HOMO (eV)",
+          'gwlumo': "GW LUMO (eV)",
+          'kslumo': "KS LUMO (eV)",
+          'scissor_residues0': "scissor residues (eV)",
+          'scissor_residues1': "scissor residues (eV)"}
 
 
 class MyPlotStyle(object):
     """
     base clase for plots setting visual settings
     """
+    @staticmethod
     def set_style(self):
         """
         """
@@ -230,20 +231,11 @@ class ScatterPlot(MyPlotStyle):
         self.names = []
         self.data = []
 
-        my_list = []
-        #for system in col.systems:
-        #    for ps in col.ps:
-
         for item in self.data_set:
             if not silent:
                 print(item)
             x.append(item['data'][xlabel])
             y.append(item['data'][ylabel])
-
-#        for item in my_list:
-##            print(item)
-#            self.names.append(item['system']+"."+item['ps'].split('-')[-1])
-#            self.data.append(item['data'][self.to_plot])
 
         self.plot.scatter(x, y)
         self.plot.ylabel(labels[ylabel])
@@ -257,7 +249,7 @@ class ScatterPlot(MyPlotStyle):
         return (self.fig, self.ax)
 
 
-class ConvTest():
+class ConvTest(object):
     def __init__(self, title='title',
                  x=7*[-50, 0, 50], y=3*[-75]+3*[-50]+3*[-25]+3*[0]+3*[25]+3*[50]+3*[75], z=[np.random.random(3*7)]):
         """
@@ -271,17 +263,13 @@ class ConvTest():
         self.x = np.array(x).reshape((lx, ly))
         self.y = np.array(y).reshape((lx, ly))
         self.z = np.array(z).reshape((lx, ly))
-        #self.x, self.y, self.z = axes3d.get_test_data(0.05)
-        #print self.x
-        #print self.y
-        #print self.z
         ax = self.fig.gca(projection='3d')
         c = 1  # int((np.max(self.x) - np.min(self.x)) / (lx - 1))
         r = 1  # int((np.max(self.y) - np.min(self.y)) / (ly - 1))
         ax.plot_surface(self.x, self.y, self.z, rstride=r, cstride=c, alpha=0.7, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        cset = ax.contourf(self.x, self.y, self.z, zdir='z', offset=1.2*np.min(self.z) - 0.2*np.max(self.z), cmap=cm.coolwarm)
-        cset = ax.contourf(self.x, self.y, self.z, zdir='x', offset=1.2*np.min(self.x) - 0.2*np.max(self.x), cmap=cm.coolwarm)
-        cset = ax.contourf(self.x, self.y, self.z, zdir='y', offset=1.2*np.max(self.y) - 0.2*np.min(self.y), cmap=cm.coolwarm)
+        ax.contourf(self.x, self.y, self.z, zdir='z', offset=1.2*np.min(self.z) - 0.2*np.max(self.z), cmap=cm.coolwarm)
+        ax.contourf(self.x, self.y, self.z, zdir='x', offset=1.2*np.min(self.x) - 0.2*np.max(self.x), cmap=cm.coolwarm)
+        ax.contourf(self.x, self.y, self.z, zdir='y', offset=1.2*np.max(self.y) - 0.2*np.min(self.y), cmap=cm.coolwarm)
 
         self.plot.title(title)
         ax.set_xlabel('Nb')
@@ -298,13 +286,3 @@ class ConvTest():
 
     def return_fig_ax(self):
         return (self.fig, self.ax)
-
-#surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm,
-#        linewidth=0, antialiased=False)
-#fig = plt.figure()
-#ax = fig.gca(projection='3d')
-#X, Y, Z = axes3d.get_test_data(0.05)
-#ax.plot_surface(X, Y, Z, rstride=8, cstride=8, alpha=0.3)
-#cset = ax.contour(X, Y, Z, zdir='z', offset=-100, cmap=cm.coolwarm)
-#cset = ax.contour(X, Y, Z, zdir='x', offset=-40, cmap=cm.coolwarm)
-#cset = ax.contour(X, Y, Z, zdir='y', offset=40, cmap=cm.coolwarm)
