@@ -80,7 +80,7 @@ class AbstractAbInitioSpec(MSONable):
 
     def write_to_file(self, filename):
         with open(filename, mode='w') as f:
-            json.dump(obj=self.to_dict(), fp=f)
+            json.dump(obj=self.to_dict(), fp=f, indent=2)
 
     def read_from_file(self, filename):
         try:
@@ -233,7 +233,7 @@ class AbstractAbInitioSpec(MSONable):
                 action(structure)
                 ok += 1
             except Exception as exc:
-                print('%s\n%s' % (modes[mode]['fail_msg'], exc))
+                print('%s\n exception: %s %s' % (modes[mode]['fail_msg'], exc.__class__, exc.message))
                 not_ok += 1
                 errors[s_name(structure)] = exc.message
 
@@ -966,15 +966,15 @@ class GWConvergenceData(object):
         this file is later used in a subsequent 'full' calculation to perform the calculations at a higher kp-mesh
         """
         if self.conv_res['control']['nbands'] or True:
-
             filename = self.name + '.conv_res'
-            f = open(filename, mode='w')
-            string = "{'control': "+str(self.conv_res['control'])+", 'values': "
-            string += self.code_interface.conv_res_string(self.conv_res)
-            string += ", 'derivatives': "+str(self.conv_res['derivatives'])
-            string += '}'
-            f.write(string)
-            f.close()
+            with open(filename, mode='w') as f:
+                json.dump(self.conv_res, fp=f, indent=2)
+
+                #            string = "{'control': "+str(self.conv_res['control'])+", 'values': "
+                #            string += self.code_interface.conv_res_string(self.conv_res)
+                #            string += ", 'derivatives': "+str(self.conv_res['derivatives'])
+                #            string += '}'
+                #            print(string)
 
     def print_full_res(self):
         """
@@ -982,10 +982,8 @@ class GWConvergenceData(object):
         """
         print(self.full_res)
         filename = self.name + '.full_res'
-        f = open(filename, mode='w')
-        string = str(self.full_res)
-        f.write(string)
-        f.close()
+        with open(filename, mode='w') as f:
+            json.dump(self.full_res, f, indent=2)
 
 
 # API :

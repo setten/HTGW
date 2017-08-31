@@ -127,11 +127,11 @@ class GWTestHelpers(PymatgenTest):
         os.environ['ABINIT_PS'] = wdir
 
         tests = SingleAbinitGWWork(struc, spec).convs
-        tests_out = {'nscf_nbands': {'test_range': (40,),
+        tests_out = {'nscf_nbands': {'test_range': (25,),
                                      'control': 'gap', 'method': 'set_bands', 'level': 'nscf'},
                      'ecut': {'test_range': (50, 48, 46, 44),
                               'control': 'e_ks_max', 'method': 'direct', 'level': 'scf'},
-                     'ecuteps': {'test_range': (4, 8, 12, 16, 20),
+                     'ecuteps': {'test_range': (4, 6, 8, 10, 12),
                                  'control': 'gap', 'method': 'direct', 'level': 'sigma'}}
         self.assertEqual(expand(tests, 1), tests_out)
         spec.data['code'] = 'VASP'

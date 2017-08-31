@@ -1,24 +1,23 @@
 from __future__ import division, print_function, unicode_literals
-
-import unittest
-#try:
-#    raise ImportError("No module named sets_deprecated")
-#except ImportError:
-#    raise unittest.SkipTest("Skipping all tests in test_classes due to sets_deprecated")
-
 import os
 import shutil
 import tempfile
 import abipy.data as abidata
-
 from abipy.core.testing import AbipyTest
+from pymatgen.core.structure import Structure
 from HTGW.flows.datastructures import GWSpecs, get_spec  # , GWConvergenceData
-
-#from pymatgen import SETTINGS
-#POTCAR_DIR = SETTINGS.get("VASP_PSP_DIR")
+from HTGW.scripts.abiGWsetup import main as gwsetup
+from HTGW.scripts.abiGWoutput import main as gwoutput
+from HTGW.flows.helpers import is_converged
 
 
 __author__ = 'setten'
+
+__reference_dir__ = os.path.join(os.getcwd(), 'HTGW', 'test_files')
+if not os.path.isdir(__reference_dir__):
+    print('failing to read from %s' % __reference_dir__)
+    print(os.listdir(__reference_dir__))
+    raise RuntimeError('to run nose or py test needs to be started in the HTGW root')
 
 
 class GWSetupTest(AbipyTest):
@@ -193,17 +192,17 @@ class GWSetupTest(AbipyTest):
             abi = f.readlines()
         for line in abi:
             print(line.strip())
-        for x in [' kptopt 1\n', ' shiftk    0.0    0.0    0.0\n', ' ngkpt 2 2 2\n', ' nshiftk 1\n', ' iscf -2\n', ' nband 180\n',
+        for x in [' kptopt 1\n', ' shiftk    0.0    0.0    0.0\n', ' ngkpt 2 2 2\n', ' nshiftk 1\n', ' iscf -2\n', ' nband 120\n',
                   ' nsppol 1\n', ' ecut 44\n', ' toldfe 1e-08\n', ' gwmem 10\n', ' inclvkb 2\n', '\n', ' symsigma 1\n',
-                  ' ecuteps 20\n']:
+                  ' ecuteps 12\n']:
             self.assertIn(x, abi)
 
         # reading this directory will break if the grid of nband and ecut eps values for convergence tests is changed
         with open('Si_si.cif/w0/t44/run.abi') as f:
             abi = f.readlines()
-        for x in [' kptopt 1\n', ' shiftk    0.0    0.0    0.0\n', ' ngkpt 2 2 2\n', ' nshiftk 1\n', ' iscf -2\n', ' nband 180\n',
+        for x in [' kptopt 1\n', ' shiftk    0.0    0.0    0.0\n', ' ngkpt 2 2 2\n', ' nshiftk 1\n', ' iscf -2\n', ' nband 120\n',
                   ' nsppol 1\n', ' ecut 44\n', ' toldfe 1e-08\n', ' gwmem 10\n', ' inclvkb 2\n', '\n', ' symsigma 1\n',
-                  ' ecuteps 20\n', ' gw_qprange 2\n', ' ppmodel 1\n', ' gwcalctyp 00\n']:
+                  ' ecuteps 12\n', ' gw_qprange 2\n', ' ppmodel 1\n', ' gwcalctyp 00\n']:
             self.assertIn(x, abi)
 
 
@@ -212,6 +211,10 @@ class GWOutputTest(AbipyTest):
         """
         Testing loop_structures output parsing mode o empty case
         """
+        wdir = tempfile.mkdtemp()
+        print('wdir', wdir)
+        os.chdir(wdir)
+        shutil.copyfile(abidata.cif_file("si.cif"), os.path.join(wdir, 'si.cif'))
         spec_in = get_spec('GW')
         self.assertIsInstance(spec_in, GWSpecs)
         spec_in.data['source'] = 'cif'
@@ -227,6 +230,10 @@ class GWPrintTest(AbipyTest):
         """
         Testing loop_structures print mode w empty case
         """
+        wdir = tempfile.mkdtemp()
+        print('wdir', wdir)
+        os.chdir(wdir)
+        shutil.copyfile(abidata.cif_file("si.cif"), os.path.join(wdir, 'si.cif'))
         spec_in = get_spec('GW')
         self.assertIsInstance(spec_in, GWSpecs)
         spec_in.data['source'] = 'cif'
@@ -242,6 +249,10 @@ class GWStoreTest(AbipyTest):
         """
         Testing loop_structures store mode s empty case
         """
+        wdir = tempfile.mkdtemp()
+        print('wdir', wdir)
+        os.chdir(wdir)
+        shutil.copyfile(abidata.cif_file("si.cif"), os.path.join(wdir, 'si.cif'))
         spec_in = get_spec('GW')
         self.assertIsInstance(spec_in, GWSpecs)
         spec_in.data['source'] = 'cif'

@@ -331,24 +331,23 @@ class GWworksTests(AbipyTest):
         print('ecuts:', ecuts)
         # it is essential that the first four are diffent, this is for the convergence study of ecut, and that
         # after that is stays the same
-        self.assertEqual(ecuts, [50, 48, 46, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
-                                 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
-                                 44, 44, 44])
+        self.assertEqual(ecuts, [50, 48, 46, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+                                 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+                                 44])
 
         nbands = [dict(task.input.as_dict()['abi_args'])['nband'] for task in flow[0]]
         print('nbands:', nbands)
         # the firs 4 should be 'low' these are self consistent
         # the fifth should be the maximum of what follows
         # the 6th and on should always be pairs that are the same, they are combinations of scr and sigma tasks
-        self.assertEqual(nbands, [26, 26, 26, 26, 180, 30, 30, 60, 60, 120, 120, 180, 180, 30, 30, 60, 60, 120, 120,
-                                  180, 180, 30, 30, 60, 60, 120, 120, 180, 180, 30, 30, 60, 60, 120, 120, 180, 180,
-                                  30, 30, 60, 60, 120, 120, 180, 180])
+        self.assertEqual(nbands, [26, 26, 26, 26, 120, 30, 30, 60, 60, 90, 90, 120, 120, 30, 30, 60, 60, 90, 90, 120,
+                                  120, 30, 30, 60, 60, 90, 90, 120, 120, 30, 30, 60, 60, 90, 90, 120, 120, 30, 30, 60,
+                                  60, 90, 90, 120, 120])
 
         ecuteps = [dict(task.input.as_dict()['abi_args']).get('ecuteps', None) for task in flow[0]]
         print('ecuteps:', ecuteps)
-        self.assertEqual(ecuteps, [None, None, None, None, None, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 12,
-                                   12, 12, 12, 12, 12, 12, 12, 16, 16, 16, 16, 16, 16, 16, 16, 20, 20, 20, 20, 20, 20,
-                                   20, 20])
+        self.assertEqual(ecuteps, [None, None, None, None, None, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8,
+                                   8, 8, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 12, 12, 12, 12, 12, 12, 12, 12])
 
         inplens = [len(task.input.as_dict()['abi_args']) for task in flow[0]]
         print(inplens)

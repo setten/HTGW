@@ -20,8 +20,8 @@ from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.core.units import Ha_to_eV
 from abipy.flowtk.netcdf import NetcdfReader
 from HTGW.flows.helpers import is_converged, read_grid_from_file, s_name, expand, store_conv_results
-from HTGW.flows.GWvaspinputsets import GWscDFTPrepVaspInputSet, GWDFTDiagVaspInputSet, \
-     GWG0W0VaspInputSet, SingleVaspGWWork
+#from HTGW.flows.GWvaspinputsets import GWscDFTPrepVaspInputSet, GWDFTDiagVaspInputSet, \
+#     GWG0W0VaspInputSet, SingleVaspGWWork
 from HTGW.flows.GWworks import VaspGWFWWorkFlow, SingleAbinitGWWork
 
 __author__ = "Michiel van Setten"

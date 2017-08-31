@@ -6,7 +6,7 @@ Script to write GW Input for VASP and ABINIT / set up work flows.
 from __future__ import unicode_literals, division, print_function, absolute_import
 import sys
 import os.path
-from abipy.gw.datastructures import get_spec
+from HTGW.flows.datastructures import get_spec
 
 __author__ = "Michiel van Setten"
 __copyright__ = " "
