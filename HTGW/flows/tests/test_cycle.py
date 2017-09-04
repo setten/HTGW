@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import time
 import sys
-from abipy.abilab import abiopen
 from abipy.core.testing import AbipyTest
 from pymatgen.core.structure import Structure
 from HTGW.scripts.abiGWsetup import main as gwsetup
@@ -99,7 +98,8 @@ class ConvergenceFullCycleTest(AbipyTest):
         print(' ==== copy reference from second flow ===  ')
         time.sleep(1)  # the .conv directory should be older than the first one
         shutil.rmtree(os.path.join(wdir, 'SiC_SiC.cif.conv'))
-        shutil.copytree(os.path.join(reference_dir, 'ref_res', 'SiC_SiC.cif.conv'), os.path.join(wdir, 'SiC_SiC.cif.conv'))
+        shutil.copytree(os.path.join(reference_dir, 'ref_res', 'SiC_SiC.cif.conv'),
+                        os.path.join(wdir, 'SiC_SiC.cif.conv'))
         self.assertTrue(os.path.isdir(os.path.join(wdir, 'SiC_SiC.cif.conv')))
         self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.conv', 'w0'))), 13)
 
@@ -115,7 +115,7 @@ class ConvergenceFullCycleTest(AbipyTest):
         print('=== *** ====\n'+out+'=== *** ====\n')
         gap = 0
         for l in out.split('\n'):
-            if 'values'  in l:
+            if 'values' in l:
                 gap = float(l.split(' ')[6])
         self.assertEqual(gap, 7.11495066416)
 
