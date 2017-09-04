@@ -683,6 +683,7 @@ class GWConvergenceData(object):
         self.code_interface = get_code_interface(spec['code'])
         self.conv_res = {'control': {}, 'values': {}, 'derivatives': {}}
         self.full_res = {'all_done': False, 'grid': 0}
+        self.final_values = ()
         if structure is not None:
             self.name = s_name(structure)
         else:
@@ -699,7 +700,7 @@ class GWConvergenceData(object):
             with open(filename, mode='r') as f:
                 self.conv_res = json.load(fp=f)
             success = True
-            print(json.dumps(self.conv_res, indent=2))
+            # print(json.dumps(self.conv_res, indent=2))
         except SyntaxError:
             print('Problems reading ', filename)
         except (OSError, IOError):
@@ -758,6 +759,7 @@ class GWConvergenceData(object):
                 # both convergence and full dirs exists
                 a = max(os.path.getatime(name), os.path.getctime(name), os.path.getmtime(name))
                 b = max(os.path.getatime(name+'.conv'), os.path.getctime(name+'.conv'), os.path.getmtime(name+'.conv'))
+                print(a, b)
                 if b > a:
                     # full is newer
                     self.type['full'] = True
@@ -862,6 +864,7 @@ class GWConvergenceData(object):
         lec = abs(ec_slope) < (1 + tol_rel) * abs(self.conv_res['derivatives']['ecuteps']) or abs(ec_slope) < tol_abs
         print('ecuteps %0.5f     %0.5f %r' % (abs(self.conv_res['derivatives']['ecuteps']), abs(ec_slope), lec))
         print('values: (nb, ec, gap)', nbs[0], ecs[0], zd[nbs[0]][ecs[0]])
+        self.final_values = (nbs[0], ecs[0], zd[nbs[0]][ecs[0]])
         if lnb and lec:
             return True
         else:

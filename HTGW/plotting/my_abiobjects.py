@@ -52,6 +52,7 @@ class MyBandsFile(object):
 class MySigResFile(object):
     """
     container for a sigres file with some additional stuff ..
+
     """
     def __init__(self, data, silent=False):
         if silent:
@@ -76,10 +77,17 @@ class MySigResFile(object):
         self.en_max_band = self.ebands.enemax()
         # self.qplist_spin = sigma_file.qplist_spin
         qpe = self.qplist_spin[0].get_field('qpe')
-        self.lumo_gw = self.qplist_spin[0].get_value((self.lumo_s, self.lumo_kp, self.lumo_b), 'qpe').real
-        self.homo_gw = self.qplist_spin[0].get_value((self.homo_s, self.homo_kp, self.homo_b), 'qpe').real
-        self.lumo_gamma_gw = self.qplist_spin[0].get_value((0, 0, self.lumo_b), 'qpe').real
-        self.homo_gamma_gw = self.qplist_spin[0].get_value((0, 0, self.homo_b), 'qpe').real
+        try:
+            #  old version
+            self.lumo_gw = self.qplist_spin[0].get_value((self.lumo_s, self.lumo_kp, self.lumo_b), 'qpe').real
+            self.homo_gw = self.qplist_spin[0].get_value((self.homo_s, self.homo_kp, self.homo_b), 'qpe').real
+            self.lumo_gamma_gw = self.qplist_spin[0].get_value((0, 0, self.lumo_b), 'qpe').real
+            self.homo_gamma_gw = self.qplist_spin[0].get_value((0, 0, self.homo_b), 'qpe').real
+        except AttributeError:
+            self.lumo_gw = self.qplist_spin[0].get_skb_field((self.lumo_s, self.lumo_kp, self.lumo_b), 'qpe').real
+            self.homo_gw = self.qplist_spin[0].get_skb_field((self.homo_s, self.homo_kp, self.homo_b), 'qpe').real
+            self.lumo_gamma_gw = self.qplist_spin[0].get_skb_field((0, 0, self.lumo_b), 'qpe').real
+            self.homo_gamma_gw = self.qplist_spin[0].get_skb_field((0, 0, self.homo_b), 'qpe').real
         e0 = self.qplist_spin[0].get_field('e0')
         self.lower = min(min(qpe).real, min(e0)) - 1
         self.upper = max(max(qpe).real, max(e0)) + 1

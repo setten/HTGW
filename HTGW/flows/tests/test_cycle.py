@@ -2,13 +2,15 @@ from __future__ import division, print_function, unicode_literals
 import os
 import shutil
 import tempfile
-import abipy.data as abidata
+import time
+import sys
+from abipy.abilab import abiopen
 from abipy.core.testing import AbipyTest
 from pymatgen.core.structure import Structure
-from HTGW.flows.datastructures import GWSpecs, get_spec  # , GWConvergenceData
 from HTGW.scripts.abiGWsetup import main as gwsetup
 from HTGW.scripts.abiGWoutput import main as gwoutput
-from HTGW.flows.helpers import is_converged
+from HTGW.flows.helpers import is_converged, read_grid_from_file, s_name
+from HTGW.plotting.my_abiobjects import MySigResFile
 
 
 __author__ = 'setten'
@@ -25,6 +27,11 @@ class ConvergenceFullCycleTest(AbipyTest):
         """
         Testing a full convergence calculation cycle on SiC using precomupted data.
         """
+
+        # the current version uses refence data from a run using the production version on zenobe
+        # once all checks out the run should be done using the input generated using this version to replace the
+        # reference
+
         wdir = tempfile.mkdtemp()
         os.chdir(wdir)
 
@@ -83,12 +90,69 @@ class ConvergenceFullCycleTest(AbipyTest):
         self.assertTrue(os.path.isfile('SiC_SiC.cif.full_res'))
 
         print(' ==== generate next flow ===  ')
+        print('      version with bandstructure and dos  ')
         gwsetup(update=False)
         self.assertTrue(os.path.isdir('SiC_SiC.cif.conv'))
-
-        # to be continued
+        print(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.conv', 'w0')))
+        self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.conv', 'w0'))), 15)
 
         print(' ==== copy reference from second flow ===  ')
+        time.sleep(1)  # the .conv directory should be older than the first one
+        shutil.rmtree(os.path.join(wdir, 'SiC_SiC.cif.conv'))
+        shutil.copytree(os.path.join(reference_dir, 'ref_res', 'SiC_SiC.cif.conv'), os.path.join(wdir, 'SiC_SiC.cif.conv'))
+        self.assertTrue(os.path.isdir(os.path.join(wdir, 'SiC_SiC.cif.conv')))
+        self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.conv', 'w0'))), 13)
+
+        print(' ==== process output ===  ')
+        from cStringIO import StringIO
+        backup = sys.stdout
+        sys.stdout = StringIO()  # capture output
+        gwoutput()
+        out = sys.stdout.getvalue()  # release output
+        sys.stdout.close()  # close the stream
+        sys.stdout = backup  # restore original stdout
+
+        print('=== *** ====\n'+out+'=== *** ====\n')
+        gap = 0
+        for l in out.split('\n'):
+            if 'values'  in l:
+                gap = float(l.split(' ')[6])
+        self.assertEqual(gap, 7.11495066416)
+
+        print(os.listdir('.'))
+        print('processed')
+        self.assertTrue(os.path.isfile('SiC_SiC.cif.full_res'))
+        full_res = read_grid_from_file(s_name(structure)+'.full_res')
+        self.assertEqual(full_res, {u'all_done': True, u'remark': u'No converged SCf parameter found. Continue anyway.',
+                                    u'grid': 0})
+        self.assertTrue(os.path.isdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
+        self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res'))), 5)
+        print(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
+        with open(os.path.join(wdir, 'SiC_SiC.cif.res', 'out_SIGRES.nc'), 'r') as f:
+            data = f.read()
+
+        msrf = MySigResFile(data)
+        self.assertEqual(msrf.homo, 6.6843830378711786)
+        self.assertEqual(msrf.lumo, 8.0650328308487982)
+        self.assertEqual(msrf.homo_gw, 6.2325949743130034)
+        self.assertEqual(msrf.lumo_gw, 8.2504215095164763)
+        self.assertEqual(msrf.fundamental_gap('ks'), msrf.lumo - msrf.homo)
+        self.assertEqual(msrf.fundamental_gap('gw'), msrf.lumo_gw - msrf.homo_gw)
+        self.assertAlmostEqual(msrf.fundamental_gap('gamma'), gap, places=3)
+
+        # since we now have a mysigresfile object we test the functionality
+
+        msrf.get_scissor()
+        # return self.qplist_spin[0].build_scissors(domains=[[-200, mid], [mid, 200]], k=1, plot=False)
+
+        msrf.get_scissor_residues()
+        # return sc.residues
+
+        msrf.plot_scissor(title='')
+
+        msrf.plot_qpe(title='')
+
+        # to be continued
 
         if temp_ABINIT_PS is not None:
             os.environ['ABINIT_PS_EXT'] = temp_ABINIT_PS_EXT

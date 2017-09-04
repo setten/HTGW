@@ -351,14 +351,18 @@ class GWworksTests(AbipyTest):
 
         inplens = [len(task.input.as_dict()['abi_args']) for task in flow[0]]
         print(inplens)
-        self.assertEqual(inplens, [17, 17, 17, 17, 18, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30,
-                                   28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28, 30, 28,
-                                   30, 28, 30])
+        self.assertEqual(inplens, [18, 18, 18, 18, 19, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31,
+                                   29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29, 31, 29,
+                                   31, 29, 31])
 
         ngkpts = [dict(task.input.as_dict()['abi_args'])['ngkpt'] for task in flow[0]]
 
         for ngkpt in ngkpts:
             self.assertEqual(ngkpt, [2, 2, 2])
+
+        npffts = [dict(task.input.as_dict()['abi_args'])['npfft'] for task in flow[0]]
+
+        self.assertTrue(all(x == 3 for x in npffts))
 
         self.assertEqual(flow.build_and_pickle_dump(), 0)
 

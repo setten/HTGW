@@ -278,8 +278,13 @@ class SingleAbinitGWWork:
         ecut = extra_abivars.pop('ecut', 44)
         ecutsigx = extra_abivars.pop('ecutsigx', 44)
 
+        # if npfft is too large or if npfft changes between the nscf calcualtion and the screening / sigma calulations
+        # strange things can happen
+        if 'npfft' not in extra_abivars:
+            extra_abivars['npfft'] = 3
+
         if ecutsigx > ecut:
-            raise RuntimeError('ecutsigx can not be largen than ecut')
+            raise RuntimeError('ecutsigx can not be larger than ecut')
         if ecutsigx < max(ecuteps):
             raise RuntimeError('ecutsigx < ecuteps this is not realistic')
 
