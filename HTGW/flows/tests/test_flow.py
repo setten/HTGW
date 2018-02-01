@@ -13,7 +13,7 @@ class FlowTest(AbipyTest):
         """
         Testing flow creation and task registering
         """
-        flow = Flow(workdir=test_dir, manager=TaskManager.from_file(os.path.join(test_dir, "taskmanager.yml")))
+        flow = Flow(workdir=test_dir, manager=TaskManager.from_file(os.path.join(test_dir, "manager.yml")))
         inp = {}
         flow.register_task(input=inp)
         flow.allocate()

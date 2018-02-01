@@ -291,7 +291,7 @@ class GWworksTests(AbipyTest):
         for test in work.CONVS:
             self.assertIsInstance(work.CONVS[test]['test_range'], tuple)
             for item in conv_strings:
-                self.assertIsInstance(work.CONVS[test][item], unicode)
+                self.assertIsInstance(work.CONVS[test][item], str)
         self.assertEqual(work.work_dir, 'Si_test')
         self.assertEqual(len(work.pseudo_table), 1)
         self.assertEqual(work.bands_fac, 1)

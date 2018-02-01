@@ -15,7 +15,8 @@ except ImportError:
 from abc import abstractproperty, abstractmethod, ABCMeta
 from monty.json import MSONable
 from pymatgen.io.vasp.inputs import Poscar
-from pymatgen.matproj.rest import MPRester, MPRestError
+from pymatgen.ext.matproj import MPRester, MPRestError
+#from pymatgen.matproj.rest import
 from pymatgen.util.convergence import determine_convergence
 from HTGW.flows.helpers import print_gnuplot_header, s_name, add_gg_gap, refine_structure
 from pymatgen.core.structure import Structure
@@ -137,6 +138,7 @@ class AbstractAbInitioSpec(MSONable):
         o: loop structures for output parsing
         w: print all results
         """
+        ok, not_ok = 0, 0
         print('loop structures mode ', mode)
         try:
             mp_key = os.environ['MP_KEY']
@@ -225,7 +227,6 @@ class AbstractAbInitioSpec(MSONable):
                      'o': {'action': self.process_data, 'fail_msg': 'output parsing failed'}
                      }
 
-            ok, not_ok = 0, 0
             errors = {}
 
             try:
@@ -233,9 +234,9 @@ class AbstractAbInitioSpec(MSONable):
                 action(structure)
                 ok += 1
             except Exception as exc:
-                print('%s\n exception: %s %s' % (modes[mode]['fail_msg'], exc.__class__, exc.message))
+                print('%s\n exception: %s %s' % (modes[mode]['fail_msg'], exc.__class__, exc))
                 not_ok += 1
-                errors[s_name(structure)] = exc.message
+                errors[s_name(structure)] = exc.args[0]
 
             """
             if mode == 'i':
@@ -398,8 +399,8 @@ class GWSpecs(AbstractAbInitioSpec):
                 self.warnings.append('no structures defined')
         if self.data["test"] and self.data["converge"]:
             self.errors.append('both "test" and "converge" are specified, only one can be done at the same time')
-        if self.data["converge"] and not self.data['mode'] == 'fw':
-            self.warnings.append('only real converging in fw mode, for other modes ALL convergence steps are created')
+        if self.data["converge"]:
+            self.warnings.append('in convergence mode ALL convergence steps are created')
         if len(self.errors) > 0:
             print(str(len(self.errors)) + ' error(s) found:')
             for error in self.errors:
@@ -900,7 +901,7 @@ class GWConvergenceData(object):
                 except KeyError:
                     data_array.update({self.data[k]['nbands']: {self.data[k]['ecuteps']: self.data[k]['gwgap']}})
             except KeyError as ex:
-                print(ex.message)
+                print(ex.args[0])
         return data_array
 
     def get_data_array_2d(self, x_name, y_name):

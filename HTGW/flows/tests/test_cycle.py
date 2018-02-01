@@ -1,5 +1,9 @@
 from __future__ import division, print_function, unicode_literals
 import os
+try:
+    from io import StringIO
+except (ModuleNotFoundError, ImportError):
+    import cStringIO.StringIO as StringIO
 import shutil
 import tempfile
 import time
@@ -104,7 +108,6 @@ class ConvergenceFullCycleTest(AbipyTest):
         self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.conv', 'w0'))), 13)
 
         print(' ==== process output ===  ')
-        from cStringIO import StringIO
         backup = sys.stdout
         sys.stdout = StringIO()  # capture output
         gwoutput()
@@ -117,7 +120,7 @@ class ConvergenceFullCycleTest(AbipyTest):
         for l in out.split('\n'):
             if 'values' in l:
                 gap = float(l.split(' ')[6])
-        self.assertEqual(gap, 7.11495066416)
+        self.assertEqual(gap, 7.114950664158926)
 
         print(os.listdir('.'))
         print('processed')
@@ -128,10 +131,8 @@ class ConvergenceFullCycleTest(AbipyTest):
         self.assertTrue(os.path.isdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
         self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res'))), 5)
         print(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
-        with open(os.path.join(wdir, 'SiC_SiC.cif.res', 'out_SIGRES.nc'), 'r') as f:
-            data = f.read()
 
-        msrf = MySigResFile(data)
+        msrf = MySigResFile(os.path.join(wdir, 'SiC_SiC.cif.res', 'out_SIGRES.nc'))
         self.assertEqual(msrf.homo, 6.6843830378711786)
         self.assertEqual(msrf.lumo, 8.0650328308487982)
         self.assertEqual(msrf.homo_gw, 6.2325949743130034)
@@ -145,7 +146,8 @@ class ConvergenceFullCycleTest(AbipyTest):
         msrf.get_scissor()
         # return self.qplist_spin[0].build_scissors(domains=[[-200, mid], [mid, 200]], k=1, plot=False)
 
-        msrf.get_scissor_residues()
+        res = msrf.get_scissor_residues()
+        self.assertEqual(res, [0.05322754684319431, 0.34320373172956475])
         # return sc.residues
 
         msrf.plot_scissor(title='')

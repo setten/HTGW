@@ -52,16 +52,21 @@ class MyBandsFile(object):
 class MySigResFile(object):
     """
     container for a sigres file with some additional stuff ..
-
+    polimorfic srf can be a filename or the file content
     """
-    def __init__(self, data, silent=False):
+    def __init__(self, srf, silent=False):
         if silent:
             block_print()
-        name = 'tmp_SIGRES.nc'
-        f = open(name, 'w')
-        f.write(data)
-        f.close()
-        sigma_file = SigresFile(filepath=name)
+
+        try:
+            sigma_file = SigresFile(filepath=srf)
+        except (OSError, FileNotFoundError):
+            name = 'tmp_SIGRES.nc'
+            f = open(name, 'w')
+            f.write(srf)
+            f.close()
+            sigma_file = SigresFile(filepath=name)
+
         self.ebands = sigma_file.ebands
         self.qplist_spin = sigma_file.qplist_spin
         self.lumo = self.ebands.lumos[0].eig
@@ -98,8 +103,7 @@ class MySigResFile(object):
 
     def get_scissor(self):
         mid = (self.homo + self.lumo) / 2
-        return self.qplist_spin[0].build_scissors(domains=[[-200, mid], [mid, 200]], k=1,
-                                                  plot=False)
+        return self.qplist_spin[0].build_scissors(domains=[[-200, mid], [mid, 200]], k=1, plot=False)
 
     def get_scissor_residues(self):
         sc = self.get_scissor()
@@ -107,8 +111,7 @@ class MySigResFile(object):
 
     def plot_scissor(self, title=''):
         mid = (self.homo + self.lumo) / 2
-        self.qplist_spin[0].build_scissors(domains=[[self.lower, mid], [mid, self.upper]], k=1, plot=True,
-                                           title=title)
+        self.qplist_spin[0].build_scissors(domains=[[self.lower, mid], [mid, self.upper]], k=1, plot=True, title=title)
 
     def plot_qpe(self, title=''):
         self.qplist_spin[0].plot_qps_vs_e0(title=title, with_fields="qpe", fermi=self.lumo)

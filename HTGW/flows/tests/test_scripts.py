@@ -35,7 +35,7 @@ class GWSetupTest(AbipyTest):
 
         spec_in.data['source'] = 'cif'
 
-        self.assert_equal(spec_in.hash_str(), "code:ABINIT;source:cifjobs:[u'prep', u'G0W0'];mode:ceci;functional:PBE;kp_grid_dens:500prec:m;tol:0.0001;test:False;converge:False")
+        self.assert_equal(spec_in.hash_str(), "code:ABINIT;source:cifjobs:['prep', 'G0W0'];mode:ceci;functional:PBE;kp_grid_dens:500prec:m;tol:0.0001;test:False;converge:False")
 
         wdir = tempfile.mkdtemp()
         print('wdir', wdir)
@@ -123,7 +123,7 @@ class GWSetupTest(AbipyTest):
         spec_in.data['converge'] = 'True'
 
         self.assert_equal(spec_in.hash_str(),
-                          "code:ABINIT;source:cifjobs:[u'prep', u'G0W0'];mode:ceci;functional:PBE;kp_grid_dens:500prec:m;tol:0.0001;test:False;converge:True")
+                          "code:ABINIT;source:cifjobs:['prep', 'G0W0'];mode:ceci;functional:PBE;kp_grid_dens:500prec:m;tol:0.0001;test:False;converge:True")
 
         wdir = tempfile.mkdtemp()
         print('wdir', wdir)
@@ -241,7 +241,7 @@ class GWPrintTest(AbipyTest):
         return_value = spec_in.loop_structures('w')
         self.assertEqual(return_value[0], 0)
         self.assertEqual(return_value[1], 1)
-        self.assertEqual(return_value[2], {u'Si_si.cif': u'no convergence data found'})
+        self.assertEqual(return_value[2], {u'Si_si.cif': 'no convergence data found'})
 
 
 class GWStoreTest(AbipyTest):
@@ -259,4 +259,4 @@ class GWStoreTest(AbipyTest):
         return_value = spec_in.loop_structures('s')
         self.assertEqual(return_value[0], 0)
         self.assertEqual(return_value[1], 1)
-        self.assertEqual(return_value[2], {u'Si_si.cif': u'no data found to insert in db'})
+        self.assertEqual(return_value[2], {u'Si_si.cif': 'no data found to insert in db'})

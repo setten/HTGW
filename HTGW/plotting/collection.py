@@ -7,7 +7,6 @@ import time as time
 from plots import ConvTest
 from my_abiobjects import MySigResFile, MyBandsFile
 from pymatgen.matproj.rest import MPRester, MPRestError
-from abipy.flowtk.netcdf import NetcdfReaderError
 from pymatgen.util.convergence import determine_convergence
 from gridfs.errors import NoFile
 from abipy.abilab import ElectronBandsPlotter
@@ -222,7 +221,7 @@ class Collection(object):
                                         'max_en': srf.en_max_band,
                                         'scissor_residues': srf.scissor_residues}
                             entry['data'].update(srf_data)
-                        except (IOError, OSError, NetcdfReaderError):
+                        except:  # (IOError, OSError, NetcdfReaderError):
                             srf_data = {'gwfgap': 0,
                                         'ksfgap': 0,
                                         'gwhomo': 0,
