@@ -24,6 +24,7 @@ exclude_lines =
 ignore_errors = True
 
 omit =
-    HTGW/notebooks
-    HTGW/scripts
+    HTGW/notebooks/*
+    HTGW/scripts/*
+    HTGW/flows/depr_vaspio_set.py
     .ipython_checkpoints

@@ -12,6 +12,7 @@ from HTGW.flows.helpers import clean, read_extra_abivars, expand, read_grid_from
 import abipy.data as abidata
 from HTGW.flows.datastructures import get_spec
 from HTGW.flows.GWworks import SingleAbinitGWWork
+from HTGW.flows.GWtasks import get_mpi_runner_ntasks_keyword, get_vasp_environment
 
 __author__ = 'setten'
 
@@ -42,6 +43,9 @@ structure = Structure.from_dict(structure_dict)
 
 
 class GWTestHelpers(PymatgenTest):
+    def test_get_mpkw(self):
+        self.assertEqual(get_mpi_runner_ntasks_keyword('srun'), '-n')
+        self.assertEqual(get_mpi_runner_ntasks_keyword('mpirun'), '-np')
 
     def test_is_converged(self):
         """
@@ -116,12 +120,8 @@ class GWTestHelpers(PymatgenTest):
                         os.path.join(wdir, 'manager.yml'))
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'simple_scheduler.yml'), os.path.join(wdir, 'scheduler.yml'))
 
-        try:
-            temp_ABINIT_PS_EXT = os.environ['ABINIT_PS_EXT']
-            temp_ABINIT_PS = os.environ['ABINIT_PS']
-        except KeyError:
-            temp_ABINIT_PS_EXT = None
-            temp_ABINIT_PS = None
+        temp_ABINIT_PS_EXT = os.environ.get('ABINIT_PS_EXT', None)
+        temp_ABINIT_PS = os.environ.get('ABINIT_PS', None)
 
         os.environ['ABINIT_PS_EXT'] = '.pspnc'
         os.environ['ABINIT_PS'] = wdir
@@ -135,12 +135,6 @@ class GWTestHelpers(PymatgenTest):
                                  'control': 'gap', 'method': 'direct', 'level': 'sigma'}}
         self.assertEqual(expand(tests, 1), tests_out)
         spec.data['code'] = 'VASP'
-
-#        if "VASP_PSP_DIR" in os.environ:
-#            spec.update_code_interface()
-#            tests = GWG0W0VaspInputSet(struc, spec).convs
-#            tests_out = {'ENCUTGW': {'test_range': (200, 400, 600, 800), 'control': 'gap', 'method': 'incar_settings'}}
-#            self.assertEqual(expand(tests, 1), tests_out)
 
         if temp_ABINIT_PS is not None:
             os.environ['ABINIT_PS_EXT'] = temp_ABINIT_PS_EXT

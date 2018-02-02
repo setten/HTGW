@@ -16,7 +16,6 @@ from abc import abstractproperty, abstractmethod, ABCMeta
 from monty.json import MSONable
 from pymatgen.io.vasp.inputs import Poscar
 from pymatgen.ext.matproj import MPRester, MPRestError
-#from pymatgen.matproj.rest import
 from pymatgen.util.convergence import determine_convergence
 from HTGW.flows.helpers import print_gnuplot_header, s_name, add_gg_gap, refine_structure
 from pymatgen.core.structure import Structure
@@ -84,12 +83,8 @@ class AbstractAbInitioSpec(MSONable):
             json.dump(obj=self.to_dict(), fp=f, indent=2)
 
     def read_from_file(self, filename):
-        try:
-            with open(filename, mode='r') as f:
-                self.data = json.load(f)
-        except OSError:
-            print('Inputfile ', filename, ' not found exiting.')
-            exit()
+        with open(filename, mode='r') as f:
+            self.data = json.load(f)
         self.update_code_interface()
 
     def update_interactive(self):
@@ -457,12 +452,12 @@ class GWSpecs(AbstractAbInitioSpec):
 
                     if data.find_conv_pars_scf('ecut', 'full_width', self['tol'])[0]:
                         print('| parm_scr type calculation, converged scf values found')
+                        print(data.conv_res)
                     else:
                         print('| parm_scr type calculation, no converged scf values found')
                         data.full_res.update({'remark': 'No converged SCf parameter found. Continue anyway.'})
                         data.conv_res['values'].update({'ecut': 44/eV_to_Ha}) # internally we work in eV
                         data.conv_res['control'].update({'ecut': True})
-
                     # if ecut is provided in extra_abivars overwrite in any case .. this is done at input generation
                     # if 'ecut' in read_extra_abivars().keys():
                     #    data.conv_res['values'].update({'ecut': read_extra_abivars()['ecut']}) # should be in eV
@@ -834,6 +829,7 @@ class GWConvergenceData(object):
                                      extra='nbands at extrapolated ecuteps', plots=plots)
 
     def find_conv_pars_scf(self, x_name, y_name, tol=0.0001, silent=False):
+        print('**** here')
         xs = self.get_var_range(x_name)
         ys = []
         # print self.get_data_array_2d(x_name, y_name)
@@ -842,9 +838,10 @@ class GWConvergenceData(object):
         conv_data = determine_convergence(xs, ys, name=self.name, tol=tol, extra=x_name, plots=not silent)
         # print conv_data, {x_name: conv_data[0]}, {x_name: conv_data[1]}, {x_name: conv_data[5]}
         self.conv_res['control'].update({x_name: conv_data[0]})
-        factor = 1/eV_to_Ha if x_name == 'ecut' and self.code_interface.hartree_parameters else 1
+        factor = 1/eV_to_Ha if x_name == 'ecut' and not self.code_interface.hartree_parameters else 1
+        print(factor)
         self.conv_res['values'].update({x_name: conv_data[1]*factor})
-        print(conv_data[1])
+        print(conv_data)
         self.conv_res['derivatives'].update({x_name: conv_data[5]})
         return conv_data
 

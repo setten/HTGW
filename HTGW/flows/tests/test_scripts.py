@@ -14,10 +14,8 @@ from HTGW.flows.helpers import is_converged
 __author__ = 'setten'
 
 __reference_dir__ = os.path.join(os.getcwd(), 'HTGW', 'test_files')
-if not os.path.isdir(__reference_dir__):
-    print('failing to read from %s' % __reference_dir__)
-    print(os.listdir(__reference_dir__))
-    raise RuntimeError('to run nose or py test needs to be started in the HTGW root')
+if not os.path.isdir(__reference_dir__): raise RuntimeError('py.test needs to be started in the HTGW root, '
+                                                            '%s does not exist' % __reference_dir__)
 
 
 class GWSetupTest(AbipyTest):
@@ -47,12 +45,8 @@ class GWSetupTest(AbipyTest):
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'shell_manager.yml'), os.path.join(wdir, 'manager.yml'))
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'simple_scheduler.yml'), os.path.join(wdir, 'scheduler.yml'))
 
-        try:
-            temp_ABINIT_PS_EXT = os.environ['ABINIT_PS_EXT']
-            temp_ABINIT_PS = os.environ['ABINIT_PS']
-        except KeyError:
-            temp_ABINIT_PS_EXT = None
-            temp_ABINIT_PS = None
+        temp_ABINIT_PS_EXT = os.environ.get('ABINIT_PS_EXT', None)
+        temp_ABINIT_PS = os.environ.get('ABINIT_PS', None)
 
         os.environ['ABINIT_PS_EXT'] = '.pspnc'
         os.environ['ABINIT_PS'] = wdir
@@ -136,12 +130,8 @@ class GWSetupTest(AbipyTest):
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'simple_scheduler.yml'),
                         os.path.join(wdir, 'scheduler.yml'))
 
-        try:
-            temp_ABINIT_PS_EXT = os.environ['ABINIT_PS_EXT']
-            temp_ABINIT_PS = os.environ['ABINIT_PS']
-        except KeyError:
-            temp_ABINIT_PS_EXT = None
-            temp_ABINIT_PS = None
+        temp_ABINIT_PS_EXT = os.environ.get('ABINIT_PS_EXT', None)
+        temp_ABINIT_PS = os.environ.get('ABINIT_PS', None)
 
         os.environ['ABINIT_PS_EXT'] = '.pspnc'
         os.environ['ABINIT_PS'] = wdir

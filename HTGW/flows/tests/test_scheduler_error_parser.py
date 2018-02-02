@@ -186,7 +186,3 @@ class QueueErrorParseTestPBS(unittest.TestCase):
         self.assertIsInstance(parser.errors[0], MemoryCancelError)
         os.remove(test_file)
         os.remove(err_file)
-
-
-if __name__ == '__main__':
-    unittest.main()

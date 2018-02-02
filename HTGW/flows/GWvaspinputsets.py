@@ -21,7 +21,7 @@ import os.path
 import stat
 
 from pymatgen.io.vasp.inputs import Kpoints, Potcar
-from HTGW.flows.vaspio_set import DictVaspInputSet
+from pymatgen.io.vasp.sets import DictSet
 from HTGW.flows.helpers import s_name
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +35,7 @@ number is assumed to be on the environment variable NPARGWCALC.
 """
 
 
-class GWscDFTPrepVaspInputSet(DictVaspInputSet):
+class GWscDFTPrepVaspInputSet(DictSet):
     """
     Implementation of VaspInputSet overriding MaterialsProjectVaspInputSet
     for static calculations preparing for a GW calculation.
@@ -48,7 +48,7 @@ class GWscDFTPrepVaspInputSet(DictVaspInputSet):
         Supports the same kwargs as :class:`JSONVaspInputSet`.
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
-            DictVaspInputSet.__init__(
+            DictSet.__init__(
                 self, "MP Static Self consistent run for GW", json.load(f), **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
@@ -84,14 +84,14 @@ class GWscDFTPrepVaspInputSet(DictVaspInputSet):
         test_type = all_tests[test]['method']
         npar = self.get_npar(self.structure)
         if test_type == 'incar_settings':
-            self.incar_settings.update({test: value})
+            self.user_incar_settings.update({test: value})
         if test_type == 'set_nomega':
             nomega = npar * int(value / npar)
-            self.incar_settings.update({"NOMEGA": int(nomega)})
+            self.user_incar_settings.update({"NOMEGA": int(nomega)})
         if test_type == 'set_nbands':
             nbands = value * self.get_bands(self.structure)
             nbands = npar * int(nbands / npar + 1)
-            self.incar_settings.update({"NBANDS": int(nbands)})
+            self.user_incar_settings.update({"NBANDS": int(nbands)})
         if test_type == 'kpoint_grid':
             pass
 
@@ -110,7 +110,7 @@ class GWscDFTPrepVaspInputSet(DictVaspInputSet):
         """
         if self.sort_structure:
             structure = structure.get_sorted_structure()
-        dens = int(self.kpoints_settings['grid_density'])
+        dens = int(self.user_kpoints_settings['grid_density'])
         if dens == 1:
             return Kpoints.gamma_automatic()
         else:
@@ -120,9 +120,9 @@ class GWscDFTPrepVaspInputSet(DictVaspInputSet):
         """
         sets the grid_density to the value specified in spec
         """
-        self.kpoints_settings['grid_density'] = spec['kp_grid_dens']
+        self.user_kpoints_settings['grid_density'] = spec['kp_grid_dens']
         if spec['kp_grid_dens'] < 100:
-            self.incar_settings.update({'ISMEAR': 0})
+            self.user_incar_settings.update({'ISMEAR': 0})
 
     def get_electrons(self, structure):
         """
@@ -146,11 +146,11 @@ class GWscDFTPrepVaspInputSet(DictVaspInputSet):
         """
         absolute minimal setting for testing
         """
-        self.incar_settings.update({"PREC": "low", "ENCUT": 250})
-        self.kpoints_settings['grid_density'] = 1
+        self.user_incar_settings.update({"PREC": "low", "ENCUT": 250})
+        self.user_kpoints_settings['grid_density'] = 1
 
     def set_prec_high(self):
-        self.incar_settings.update({"PREC": "Accurate", "ENCUT": 400})
+        self.user_incar_settings.update({"PREC": "Accurate", "ENCUT": 400})
 
 
 class GWDFTDiagVaspInputSet(GWscDFTPrepVaspInputSet):
@@ -167,7 +167,7 @@ class GWDFTDiagVaspInputSet(GWscDFTPrepVaspInputSet):
         Supports the same kwargs as :class:`JSONVaspInputSet`.
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
-            DictVaspInputSet.__init__(
+            DictSet.__init__(
                 self, "MP Static exact diagonalization", json.load(f), **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
@@ -177,10 +177,10 @@ class GWDFTDiagVaspInputSet(GWscDFTPrepVaspInputSet):
         self.set_dens(spec)
         npar = self.get_npar(self.structure)
         #single step exact diagonalization, output WAVEDER
-        self.incar_settings.update({"ALGO": "Exact", "NELM": 1, "LOPTICS": "TRUE"})
+        self.user_incar_settings.update({"ALGO": "Exact", "NELM": 1, "LOPTICS": "TRUE"})
         # for large systems exact diagonalization consumes too much memory
         self.set_gw_bands(15)
-        self.incar_settings.update({"NPAR": npar})
+        self.user_incar_settings.update({"NPAR": npar})
 
     def set_gw_bands(self, factor=15):
         """
@@ -188,9 +188,9 @@ class GWDFTDiagVaspInputSet(GWscDFTPrepVaspInputSet):
         """
         gw_bands = self.get_bands(self.structure)
         gw_bands = self.get_npar(self.structure) * int((factor * gw_bands) / self.get_npar(self.structure) + 1)
-        self.incar_settings.update({"NBANDS": gw_bands})
+        self.user_incar_settings.update({"NBANDS": gw_bands})
         if gw_bands > 800:
-            self.incar_settings.update({"ALGO": 'fast'})
+            self.user_incar_settings.update({"ALGO": 'fast'})
 
     def set_prec_high(self):
         super(GWDFTDiagVaspInputSet, self).set_prec_high()
@@ -212,7 +212,7 @@ class GWG0W0VaspInputSet(GWDFTDiagVaspInputSet):
         Supports the same kwargs as :class:`JSONVaspInputSet`.
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
-            DictVaspInputSet.__init__(
+            DictSet.__init__(
                 self, "MP Static G0W0", json.load(f), **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
@@ -221,46 +221,46 @@ class GWG0W0VaspInputSet(GWDFTDiagVaspInputSet):
         self.sym_prec = sym_prec
         npar = self.get_npar(structure)
         # G0W0 calculation with reduced cutoff for the response function
-        self.incar_settings.update({"ALGO": "GW0", "ENCUTGW": 250, "LWAVE": "FALSE", "NELM": 1})
+        self.user_incar_settings.update({"ALGO": "GW0", "ENCUTGW": 250, "LWAVE": "FALSE", "NELM": 1})
         self.set_dens(spec)
         self.nomega_max = 2 * self.get_kpoints(structure).kpts[0][0]**3
         nomega = npar * int(self.nomega_max / npar)
         self.set_gw_bands(15)
-        self.incar_settings.update({"NPAR": npar})
-        self.incar_settings.update({"NOMEGA": nomega})
+        self.user_incar_settings.update({"NPAR": npar})
+        self.user_incar_settings.update({"NOMEGA": nomega})
         self.tests = self.__class__.get_defaults_tests()
 
     def wannier_on(self):
-        self.incar_settings.update({"LWANNIER90_RUN": ".TRUE."})
-        self.incar_settings.update({"LWRITE_MMN_AMN": ".TRUE."})
+        self.user_incar_settings.update({"LWANNIER90_RUN": ".TRUE."})
+        self.user_incar_settings.update({"LWRITE_MMN_AMN": ".TRUE."})
 
     def spectral_off(self):
         """
         Method to switch the use of the spectral decomposition of the response function of
         this may be used to reduce memory demands if the calculation crashes due to memory shortage
         """
-        self.incar_settings.update({"LSPECTRAL": ".False."})
+        self.user_incar_settings.update({"LSPECTRAL": ".False."})
 
     def gw0_on(self, niter=4, gwbandsfac=4, qpsc=False):
         """
         Method to switch to gw0 calculation with standard 4 iterations
         """
         # set the number of iterations of GW0
-        self.incar_settings.update({"NELM": niter})
+        self.user_incar_settings.update({"NELM": niter})
         # set the number of bands to update in the iteration of G
         npar = self.get_npar(self.structure)
         nbandsgw = self.get_bands(self.structure)*gwbandsfac
         nbandsgw = npar * int(nbandsgw / npar)
-        self.incar_settings.update({"NBANDSGW": nbandsgw})
+        self.user_incar_settings.update({"NBANDSGW": nbandsgw})
         # if set also updat the orbitals 'quasi particle self-consistency'
         if qpsc:
-            self.incar_settings.update({"ALGO": "scGW0"})
+            self.user_incar_settings.update({"ALGO": "scGW0"})
         # todo update tests ....
 
     def set_prec_high(self):
         super(GWG0W0VaspInputSet, self).set_prec_high()
-        self.incar_settings.update({"ENCUTGW": 400, "NOMEGA": int(self.incar_settings["NOMEGA"]*1.5)})
-        self.incar_settings.update({"PRECFOCK": "accurate"})
+        self.user_incar_settings.update({"ENCUTGW": 400, "NOMEGA": int(self.user_incar_settings["NOMEGA"]*1.5)})
+        self.user_incar_settings.update({"PRECFOCK": "accurate"})
 
 
 class Wannier90InputSet():
@@ -286,7 +286,7 @@ class Wannier90InputSet():
         n1 = str(int(1))
         n2 = str(int(nocc - self.parameters["n_include_bands"]))
         n3 = str(int(nocc + 1 + self.parameters["n_include_bands"]))
-        n4 = str(int(GWG0W0VaspInputSet(structure, self.spec).incar_settings["NBANDS"]))
+        n4 = str(int(GWG0W0VaspInputSet(structure, self.spec).user_incar_settings["NBANDS"]))
         line = "exclude_bands : " + n1 + "-" + n2 + ", " + n3 + "-" + n4 + "\n"
         f.write(line)
         #todo there is still a bug here...
@@ -342,7 +342,7 @@ class SingleVaspGWWork():
                 spec_tmp = self.spec.copy()
                 spec_tmp.update({'kp_grid_dens': 2})
                 inpset = GWscDFTPrepVaspInputSet(self.structure, spec_tmp, functional=self.spec['functional'])
-                inpset.incar_settings.update({"ENCUT": 800})
+                inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 if self.option['test_prep'] in GWscDFTPrepVaspInputSet.get_defaults_convs().keys() or self.option['test_prep'] in GWscDFTPrepVaspInputSet.get_defaults_tests().keys():
                     inpset.set_test(self.option['test_prep'], self.option['value_prep'])
@@ -357,10 +357,10 @@ class SingleVaspGWWork():
                 spec_tmp = self.spec.copy()
                 spec_tmp.update({'kp_grid_dens': 2})
                 inpset = GWDFTDiagVaspInputSet(self.structure, spec_tmp, functional=self.spec['functional'])
-                inpset.incar_settings.update({"ENCUT": 800})
+                inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 inpset.set_test(self.option['test_prep'], self.option['value_prep'])
-            inpset.get_incar(self.structure).write_file(os.path.join(path, 'INCAR.DIAG'))
+            inpset.user_get_incar(self.structure).write_file(os.path.join(path, 'INCAR.DIAG'))
 
         if self.job == 'G0W0':
 
@@ -369,7 +369,7 @@ class SingleVaspGWWork():
                 spec_tmp = self.spec.copy()
                 spec_tmp.update({'kp_grid_dens': 2})
                 inpset = GWG0W0VaspInputSet(self.structure, spec_tmp, functional=self.spec['functional'])
-                inpset.incar_settings.update({"ENCUT": 800})
+                inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 inpset.set_test(self.option['test_prep'], self.option['value_prep'])
                 inpset.set_test(self.option['test'], self.option['value'])
@@ -390,7 +390,7 @@ class SingleVaspGWWork():
                 spec_tmp = self.spec.copy()
                 spec_tmp.update({'kp_grid_dens': 2})
                 inpset = GWG0W0VaspInputSet(self.structure, spec_tmp, functional=self.spec['functional'])
-                inpset.incar_settings.update({"ENCUT": 800})
+                inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 inpset.set_test(self.option['test_prep'], self.option['value_prep'])
                 inpset.set_test(self.option['test'], self.option['value'])
@@ -412,7 +412,7 @@ class SingleVaspGWWork():
                 spec_tmp = self.spec.copy()
                 spec_tmp.update({'kp_grid_dens': 2})
                 inpset = GWG0W0VaspInputSet(self.structure, spec_tmp, functional=self.spec['functional'])
-                inpset.incar_settings.update({"ENCUT": 800})
+                inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 inpset.set_test(self.option['test_prep'], self.option['value_prep'])
                 inpset.set_test(self.option['test'], self.option['value'])

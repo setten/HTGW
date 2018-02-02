@@ -40,6 +40,7 @@ class GWSpecTest(AbipyTest):
         Testing the class GWSpecs()
         """
         spec = GWSpecs()
+        self.assertEqual(len(spec.as_dict()), 10)
         self.assertIsInstance(spec, GWSpecs)
         self.assertEqual(spec.get_code(), 'ABINIT')
         self.assertIsInstance(spec.code_interface, AbinitInterface)
@@ -87,7 +88,7 @@ class GWConvergenceDataTest(AbipyTest):
         os.remove(f_name)
         self.assertEqual(conv_data.full_res, {'all_done': True, 'grid': 0})
         conv_res = {'control': {'ecuteps': True, 'nbands': True, 'ecut': True},
-                    'values': {'ecuteps': 101.98825, 'nbands': 30.0, 'ecut': 326.53663224759407, 'gap': 3.13196},
+                    'values': {'ecuteps': 101.98825, 'nbands': 30.0, 'ecut': 12.0, 'gap': 3.13196},
                     'derivatives': {'ecuteps': 0.00023077744572658418, 'nbands': -0.0013567555555555532, 'ecut': 0.16666666666665808}}
         with open(test_file, 'w') as f:
             json.dump(obj=conv_res, fp=f)
@@ -117,6 +118,7 @@ class GWConvergenceDataTest(AbipyTest):
         conv_data.find_conv_pars(tol=-0.1, silent=True)
         conv_data.find_conv_pars_scf('ecut', 'full_width', tol=-0.1, silent=True)
         conv_data.print_conv_res()
+        print('********* here')
         print(conv_data.conv_res)
         self.assertEqual(conv_data.conv_res['control'], conv_res['control'])
         self.assertEqual(conv_data.conv_res['derivatives'], conv_res['derivatives'])
@@ -137,7 +139,9 @@ class GWTestCodeInterfaces(AbipyTest):
         self.assertIsInstance(interface, VaspInterface)
         self.assertEqual(len(interface.conv_pars), 3)
         self.assertEqual(len(interface.supported_methods), 4)
-        # self.assertEqual(interface.get_conv_res_test(spec_data=spec.data, structure=structure), {})
+        self.assertFalse(interface.hartree_parameters)
+        self.assertIsNone(interface.read_ps_dir())
+        #self.assertEqual(interface.get_conv_res_test(spec_data=spec.data, structure=structure), {})
 
     def test_AbinitInterface(self):
         """
@@ -153,7 +157,16 @@ class GWTestCodeInterfaces(AbipyTest):
         self.assertFalse(interface.converged)
         self.assertEqual(len(interface.other_vars), 1166)
         self.assertEqual(interface.gw_data_file, 'out_SIGRES.nc')
+        w_path = os.path.join('HTGW', 'test_files', 'SiC_test_case', 'ref_res', 'SiC_SiC.cif', 'w0', 't0', 'outdata')
+        os.listdir(w_path)
+        print(interface.read_convergence_data(w_path))
+        self.assertEqual(len(interface.read_convergence_data(w_path)), 4)
+        self.assertTrue(interface.read_convergence_data(w_path)['full_width'] > 0.0)
         self.assertIsNone(interface.workdir)
+        conv_res = {'values': {'nbands': 10, 'ecut': 10, 'ecuteps': 10}}
+        self.assertEqual(interface.conv_res_string(conv_res), "{'nscf_nbands': 10, 'ecut': 10, 'ecuteps': 10}")
+        self.assertEqual(interface.test_methods({'jobs': ['prep', 'G0W0']}), [])
+        self.assertEqual(interface.test_methods({'jobs': ['scGW']}), ['scGW is not supported'])
 
 
 class GWVaspInputSetTests(AbipyTest):
@@ -268,12 +281,8 @@ class GWworksTests(AbipyTest):
                         os.path.join(wdir, 'manager.yml'))
         shutil.copyfile(os.path.join(abidata.dirpath, 'managers', 'simple_scheduler.yml'), os.path.join(wdir, 'scheduler.yml'))
 
-        try:
-            temp_ABINIT_PS_EXT = os.environ['ABINIT_PS_EXT']
-            temp_ABINIT_PS = os.environ['ABINIT_PS']
-        except KeyError:
-            temp_ABINIT_PS_EXT = None
-            temp_ABINIT_PS = None
+        temp_ABINIT_PS_EXT = os.environ.get('ABINIT_PS_EXT', None)
+        temp_ABINIT_PS = os.environ.get('ABINIT_PS', None)
 
         os.environ['ABINIT_PS_EXT'] = '.pspnc'
         os.environ['ABINIT_PS'] = wdir

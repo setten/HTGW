@@ -20,8 +20,8 @@ from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.core.units import Ha_to_eV
 from abipy.flowtk.netcdf import NetcdfReader
 from HTGW.flows.helpers import is_converged, read_grid_from_file, s_name, expand, store_conv_results
-#from HTGW.flows.GWvaspinputsets import GWscDFTPrepVaspInputSet, GWDFTDiagVaspInputSet, \
-#     GWG0W0VaspInputSet, SingleVaspGWWork
+from HTGW.flows.GWvaspinputsets import GWscDFTPrepVaspInputSet, GWDFTDiagVaspInputSet, \
+     GWG0W0VaspInputSet, SingleVaspGWWork
 from HTGW.flows.GWworks import VaspGWFWWorkFlow, SingleAbinitGWWork
 
 __author__ = "Michiel van Setten"
@@ -138,7 +138,7 @@ class VaspInterface(AbstractCodeInterface):
         return {'nbands': 'NBANDS', 'ecuteps': 'ENCUTGW', 'ecut': 'ENCUT'}
 
     def read_ps_dir(self):
-        location = os.environ['VASP_PSP_DIR']
+        location = os.environ.get('VASP_PSP_DIR', None)
         return location
 
     def read_convergence_data(self, data_dir):
@@ -359,7 +359,7 @@ class AbinitInterface(AbstractCodeInterface):
             # return the lowest and hightest eigenvalue at gamma
             data = NetcdfReader(scfruneig)
             out = NetcdfReader(scfrunout)
-            if data.read_value('Eigenvalues')[0][0][-1] < 2.0:  # bad way to select only the scf results ..
+            if data.read_value('Eigenvalues')[0][0][-1] < 3.0:  # bad way to select only the scf results ..
                 ecut = float(out.read_value('ecut'))
                 results = {'ecut': Ha_to_eV * ecut,
                            'min': data.read_value('Eigenvalues')[0][0][0]*Ha_to_eV,
@@ -367,6 +367,7 @@ class AbinitInterface(AbstractCodeInterface):
                            'full_width': (data.read_value('Eigenvalues')[0][0][-1] -
                                           data.read_value('Eigenvalues')[0][0][0])*Ha_to_eV}
                 data.close()
+                print(results)
             return results
 
     def test(self, data):

@@ -162,14 +162,15 @@ def is_converged(hartree_parameters, structure, return_values=False):
                                           ' or was not parsed ...')
         converged = False
         return converged
+    print(conv_res)
     if return_values and converged:
         if hartree_parameters:
             try:
-                conv_res['values']['ecut'] = 4 * math.ceil(conv_res['values']['ecut'] * eV_to_Ha / 4)
+                conv_res['values']['ecut'] = 4.0 * math.ceil(conv_res['values']['ecut'] * eV_to_Ha / 4)
             except (KeyError, ArithmeticError, FloatingPointError, SyntaxError) as ex:
                 print('exception in is_converged %s', ex.message)
             try:
-                conv_res['values']['ecuteps'] = 4 * math.ceil(conv_res['values']['ecuteps'] * eV_to_Ha / 4)
+                conv_res['values']['ecuteps'] = 4.0 * math.ceil(conv_res['values']['ecuteps'] * eV_to_Ha / 4)
             except (KeyError, ArithmeticError, FloatingPointError, SyntaxError) as ex:
                 print('exception in is_converged %s', ex.message)
         for k in conv_res['values'].keys():

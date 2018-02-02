@@ -15,18 +15,15 @@ from HTGW.scripts.abiGWoutput import main as gwoutput
 from HTGW.flows.helpers import is_converged, read_grid_from_file, s_name
 from HTGW.plotting.my_abiobjects import MySigResFile
 
-
 __author__ = 'setten'
 
 __reference_dir__ = os.path.join(os.getcwd(), 'HTGW', 'test_files')
-if not os.path.isdir(__reference_dir__):
-    print('failing to read from %s' % __reference_dir__)
-    print(os.listdir(__reference_dir__))
-    raise RuntimeError('to run nose or py test needs to be started in the HTGW root')
+if not os.path.isdir(__reference_dir__): raise RuntimeError('py.test needs to be started in the HTGW root, '
+                                                            '%s does not exist' % __reference_dir__)
 
 
 class ConvergenceFullCycleTest(AbipyTest):
-    def SiC_conv_test(self):
+    def test_SiC_conv(self):
         """
         Testing a full convergence calculation cycle on SiC using precomupted data.
         """
@@ -38,22 +35,15 @@ class ConvergenceFullCycleTest(AbipyTest):
         wdir = tempfile.mkdtemp()
         os.chdir(wdir)
 
-        try:
-            temp_ABINIT_PS_EXT = os.environ['ABINIT_PS_EXT']
-            temp_ABINIT_PS = os.environ['ABINIT_PS']
-        except KeyError:
-            temp_ABINIT_PS_EXT = None
-            temp_ABINIT_PS = None
+        temp_ABINIT_PS_EXT = os.environ.get('ABINIT_PS_EXT', None)
+        temp_ABINIT_PS = os.environ.get('ABINIT_PS', None)
 
         os.environ['ABINIT_PS_EXT'] = '.psp8'
         os.environ['ABINIT_PS'] = wdir
 
         reference_dir = os.path.join(__reference_dir__, 'SiC_test_case')
-        if not os.path.isdir(reference_dir):
-            print('failing to read from %s' % reference_dir)
-            print(os.listdir(reference_dir))
-            raise RuntimeError('to run ConvergenceFullCycleTest nose or py test needs to be started in the '
-                               'HTGW root')
+        if not os.path.isdir(reference_dir): raise RuntimeError('py.test needs to be started in the HTGW root, '
+                                                                '%s does not exist' % __reference_dir__)
 
         # copy input
         print(wdir)
@@ -126,8 +116,7 @@ class ConvergenceFullCycleTest(AbipyTest):
         print('processed')
         self.assertTrue(os.path.isfile('SiC_SiC.cif.full_res'))
         full_res = read_grid_from_file(s_name(structure)+'.full_res')
-        self.assertEqual(full_res, {u'all_done': True, u'remark': u'No converged SCf parameter found. Continue anyway.',
-                                    u'grid': 0})
+        self.assertEqual(full_res, {u'all_done': True, u'grid': 0})
         self.assertTrue(os.path.isdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
         self.assertEqual(len(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res'))), 5)
         print(os.listdir(os.path.join(wdir, 'SiC_SiC.cif.res')))
@@ -150,9 +139,9 @@ class ConvergenceFullCycleTest(AbipyTest):
         self.assertEqual(res, [0.05322754684319431, 0.34320373172956475])
         # return sc.residues
 
-        msrf.plot_scissor(title='')
+        #msrf.plot_scissor(title='')
 
-        msrf.plot_qpe(title='')
+        #msrf.plot_qpe(title='')
 
         # to be continued
 
