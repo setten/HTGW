@@ -70,7 +70,10 @@ def s_name(structure):
     if os.path.isfile('old'):
         name_ = str(structure.composition.reduced_formula)
     else:
-        name_ = str(structure.composition.reduced_formula) + '_' + str(structure.item)
+        try:
+            name_ = str(structure.composition.reduced_formula) + '_' + str(structure.item)
+        except AttributeError:
+            name_ = str(structure.composition.reduced_formula)
     return name_
 
 

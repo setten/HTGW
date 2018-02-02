@@ -180,17 +180,16 @@ class GWVaspInputSetTests(AbipyTest):
         self.spec.data['code'] = 'VASP'
         self.spec.update_code_interface()
 
-    @unittest.skip('vasp input sets are broken')
     def test_GWscDFTPrepVaspInputSet(self):
         """
         Testing GWVaspInputSetTests GWscDFTPrepVaspInputSet
         """
+        print(type(self.structure))
         inpset = GWscDFTPrepVaspInputSet(structure=self.structure, spec=self.spec)
         self.assertIsInstance(inpset, GWscDFTPrepVaspInputSet)
         self.assertEqual(inpset.convs, {})
 
-    @unittest.skip('vasp input sets are broken')
-    @unittest.skipIf(POTCAR_DIR is None, "POTCAR dir is None")
+#    @unittest.skipIf(POTCAR_DIR is None, "POTCAR dir is None")
     def test_GWDFTDiagVaspInputSet(self):
         """
         Testing GWVaspInputSetTests GWDFTDiagVaspInputSet
@@ -202,15 +201,13 @@ class GWVaspInputSetTests(AbipyTest):
                          {u'NBANDS': {u'test_range': (10, 20, 30, 40, 50, 60, 70), u'control': u'gap',
                                       u'method': u'set_nbands'}})
 
-        self.assertEqual(inpset.incar_settings, {u'ALGO': u'Exact', u'EDIFF': 1e-10, u'IBRION': -1, u'ICHARG': 1,
-                                                 u'ISMEAR': -5, u'ISPIN': 1, u'LOPTICS': u'TRUE', u'LORBIT': 11,
-                                                 u'LREAL': u'AUTO', u'LWAVE': True, u'MAGMOM': {u'Co': 5, u'Cr': 5,
-                                                 u'Fe': 5, u'Mn': 5, u'Mn3+': 4, u'Mn4+': 3, u'Mo': 5, u'Ni': 5,
-                                                 u'V': 5, u'W': 5}, u'NBANDS': 240, u'NELM': 1, u'NPAR': 40,
-                                                 u'PREC': u'Medium', u'SIGMA': 0.01})
+        self.assertDictEqual(inpset.incar, {u'ALGO': u'Exact', u'EDIFF': 1e-10, u'IBRION': -1, u'ICHARG': 1,
+                                            u'ISMEAR': -5, u'ISPIN': 1, u'LOPTICS': True, u'LORBIT': 11,
+                                            u'LREAL': u'Auto', u'LWAVE': True, u'MAGMOM': [0.6, 0.6],
+                                            u'NBANDS': 240, u'NELM': 1, u'NPAR': 40,
+                                            u'PREC': u'Medium', u'SIGMA': 0.01})
 
-    @unittest.skip('vasp input sets are broken')
-    @unittest.skipIf(POTCAR_DIR is None, "POTCAR dir is None")
+#    @unittest.skipIf(POTCAR_DIR is None, "POTCAR dir is None")
     def test_GWG0W0VaspInputSet(self):
         """
         Testing GWVaspInputSetTests GWG0W0VaspInputSet

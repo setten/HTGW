@@ -49,10 +49,11 @@ class GWscDFTPrepVaspInputSet(DictSet):
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
             DictSet.__init__(
-                self, "MP Static Self consistent run for GW", json.load(f), **kwargs)
+                self, "MP Static Self consistent run for GW", json.load(f), sort_structure=False, **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
         self.convs = self.__class__.get_defaults_convs()
+        self.user_kpoints_settings = {}
         self.functional = functional
         self.set_dens(spec)
         self.sym_prec = sym_prec
@@ -95,14 +96,6 @@ class GWscDFTPrepVaspInputSet(DictSet):
         if test_type == 'kpoint_grid':
             pass
 
-    def get_potcar(self, structure):
-        """
-        Method for getting LDA potcars
-        """
-        if self.sort_structure:
-            structure = structure.get_sorted_structure()
-        return Potcar(self.get_potcar_symbols(structure), functional=self.functional)
-
     def get_kpoints(self, structure):
         """
         Writes out a KPOINTS file using the automated gamma grid method.
@@ -129,7 +122,7 @@ class GWscDFTPrepVaspInputSet(DictSet):
         Method for retrieving the number of valence electrons
         """
         valence_list = {}
-        potcar = self.get_potcar(structure)
+        potcar = self.potcar
         for pot_single in potcar:
             valence_list.update({pot_single.element: pot_single.nelectrons})
         electrons = sum([valence_list[element.symbol] for element in structure.species])
@@ -168,12 +161,13 @@ class GWDFTDiagVaspInputSet(GWscDFTPrepVaspInputSet):
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
             DictSet.__init__(
-                self, "MP Static exact diagonalization", json.load(f), **kwargs)
+                self, "MP Static exact diagonalization", json.load(f), sort_structure=False, **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
         self.convs = self.__class__.get_defaults_convs()
         self.functional = functional
         self.sym_prec = sym_prec
+        self.user_kpoints_settings = {}
         self.set_dens(spec)
         npar = self.get_npar(self.structure)
         #single step exact diagonalization, output WAVEDER
@@ -213,11 +207,12 @@ class GWG0W0VaspInputSet(GWDFTDiagVaspInputSet):
         """
         with open(os.path.join(MODULE_DIR, "GWVaspInputSet.json")) as f:
             DictSet.__init__(
-                self, "MP Static G0W0", json.load(f), **kwargs)
+                self, "MP Static G0W0", json.load(f), sort_structure=False, **kwargs)
         self.structure = structure
         self.tests = self.__class__.get_defaults_tests()
         self.convs = self.__class__.get_defaults_convs()
         self.functional = functional
+        self.user_kpoints_settings = {}
         self.sym_prec = sym_prec
         npar = self.get_npar(structure)
         # G0W0 calculation with reduced cutoff for the response function
@@ -348,7 +343,7 @@ class SingleVaspGWWork():
                     inpset.set_test(self.option['test_prep'], self.option['value_prep'])
             if self.spec["prec"] == "h":
                 inpset.set_prec_high()
-            inpset.write_input(self.structure, path)
+            inpset.write_input(path)
 
             inpset = GWDFTDiagVaspInputSet(self.structure, self.spec, functional=self.spec['functional'])
             if self.spec["prec"] == "h":
@@ -360,7 +355,7 @@ class SingleVaspGWWork():
                 inpset.user_incar_settings.update({"ENCUT": 800})
             if self.spec['test'] or self.spec['converge']:
                 inpset.set_test(self.option['test_prep'], self.option['value_prep'])
-            inpset.user_get_incar(self.structure).write_file(os.path.join(path, 'INCAR.DIAG'))
+            inpset.incar.write_file(os.path.join(path, 'INCAR.DIAG'))
 
         if self.job == 'G0W0':
 

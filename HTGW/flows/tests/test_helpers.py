@@ -39,6 +39,7 @@ structure_dict = {'lattice': {'a': 3.866974622849504,
                              'abc': [0.125, 0.125, 0.125], 'xyz': [0.55814971, 0.394671445, 0.966743655],
                              'species': [{'occu': 1, 'element': 'Si'}], 'label': 'Si'}],
                   '@class': 'Structure', '@module': 'pymatgen.core.structure'}
+
 structure = Structure.from_dict(structure_dict)
 
 

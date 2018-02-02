@@ -132,7 +132,7 @@ class VaspGWTask(object):  # (FireTaskBase, FWSerializable):
     _fw_name = "Vasp GW task"
 
     def __init__(self, parameters):
-        self.update(parameters)
+        #self.update(parameters)
         structure = Structure.from_dict(parameters['structure'])
         structure.vbm_l = parameters['band_structure']['vbm_l']
         structure.cbm_l = parameters['band_structure']['cbm_l']
@@ -155,7 +155,7 @@ class VaspGWTask(object):  # (FireTaskBase, FWSerializable):
     def get_launch_dir(self):
         launch_dir = self.get_prep_dir()
         if self.job not in 'prep':
-            if 'test' in self.option.keys():
+            if self.option is not None and 'test' in self.option.keys():
                 option_name = '.' + self.option['test'] + str(self.option['value'])
             else:
                 option_name = ''
@@ -225,7 +225,7 @@ class VaspGWExecuteTask(VaspGWTask):
 
         if frontend_serial:
             # fake run, no actual vasp execution
-            base = os.getcwdu()
+            base = os.getcwd()
             abs_work_dir = os.path.join(base, self.get_launch_dir())
             os.chdir(abs_work_dir)
             cmd = ["/home/setten/scripts/vasp"]
