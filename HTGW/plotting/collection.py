@@ -4,14 +4,14 @@ import sys
 import pymongo
 import gridfs
 import time as time
-from plots import ConvTest
-from my_abiobjects import MySigResFile, MyBandsFile
+from HTGW.plotting.plots import ConvTest
+from HTGW.plotting.my_abiobjects import MySigResFile, MyBandsFile
 from pymatgen.matproj.rest import MPRester, MPRestError
 from pymatgen.util.convergence import determine_convergence
 from gridfs.errors import NoFile
 from abipy.abilab import ElectronBandsPlotter
 from pymongo.errors import CursorNotFound
-
+from pymongo import MongoClient
 
 __author__ = 'setten'
 __version__ = "0.1"
@@ -48,7 +48,7 @@ class Collection(object):
 
         :return:
         """
-        local_serv = pymongo.Connection(server)
+        local_serv = MongoClient(server)
         try:
             user = os.environ['MAR_USER']
         except KeyError:
@@ -178,7 +178,7 @@ class Collection(object):
                          'id': "mp-%s" % mpid,
                          'ps': item['ps'].split('/')[-2],
                          'xc': item['spec']['functional'],
-                         'kp_in': item['spec']['kp_in'],
+                         'kp_in': item['spec'].get('kp_in', None),
                          'extra': self.fix_extra(item['extra_vars']),
                          'data': item['gw_results']}
                 print("id: %s" % entry['id'])

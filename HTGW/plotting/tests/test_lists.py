@@ -12,4 +12,4 @@ class ListTest(AbipyTest):
         self.assertIsInstance(ptable, dict)
 
     def test_colors(self):
-        self.assertIsInstance(colors, str)
+        self.assertIsInstance(colors, list)
