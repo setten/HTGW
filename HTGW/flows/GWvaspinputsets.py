@@ -449,7 +449,7 @@ class SingleVaspGWWork():
             if self.job == 'prep':
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name)
                 # create this job
-                job_file = open(name=os.path.join(path, 'job'), mode='w')
+                job_file = open(os.path.join(path, 'job'), mode='w')
                 job_file.write(header)
                 job_file.write('#SBATCH --job-name='+s_name(self.structure)+self.job+'\n')
                 job_file.write('#SBATCH --ntasks='+str(npar)+'\n')
@@ -471,7 +471,7 @@ class SingleVaspGWWork():
             if self.job in ['G0W0', 'GW0', 'scGW0']:
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name, self.job + option_name)
                 # create this job
-                job_file = open(name=path+'/job', mode='w')
+                job_file = open(os.path.join(path, 'job'), mode='w')
                 job_file.write(header)
                 job_file.write('#SBATCH --job-name='+s_name(self.structure)+self.job+'\n')
                 job_file.write('#SBATCH --ntasks='+str(npar)+'\n')
@@ -486,7 +486,7 @@ class SingleVaspGWWork():
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name)
                 # 'append submission of this job script to that of prep for this structure'
                 if add_to_collection:
-                    job_file = open(name=os.path.join(path, 'job'), mode='a')
+                    job_file = open(os.path.join(path, 'job'), mode='a')
                     job_file.write('cd ' + self.job + option_name + ' \n')
                     job_file.write('sbatch job \n')
                     job_file.write('cd .. \n')
@@ -522,7 +522,8 @@ class SingleVaspGWWork():
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name)
                 abs_path = os.path.abspath(path)
                 # create this job
-                job_file = open(name=os.path.join(path, 'job'), mode='w')
+                print(os.path.join(path, 'job'))
+                job_file = open(os.path.join(path, 'job'), mode='w')
                 job_file.write(header)
                 job_file.write("#PBS -l select=%s:ncpus=1:vmem=1900mb:mpiprocs=1:ompthreads=1\n" % str(npar))
                 job_file.write('#PBS -o %s/queue.qout\n#PBS -e %s/queue.qerr\ncd %s\n' % (abs_path, abs_path, abs_path))
@@ -544,7 +545,7 @@ class SingleVaspGWWork():
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name, self.job + option_name)
                 abs_path = os.path.abspath(path)
                 # create this job
-                job_file = open(name=path+'/job', mode='w')
+                job_file = open(os.path.join(path, 'job'), mode='w')
                 job_file.write(header)
                 job_file.write("#PBS -l select=%s:ncpus=1:vmem=1000mb:mpiprocs=1:ompthreads=1\n" % str(npar))
                 job_file.write('#PBS -o %s/queue.qout\n#PBS -e %s/queue.qerr\ncd %s\n' % (abs_path, abs_path, abs_path))
@@ -554,11 +555,11 @@ class SingleVaspGWWork():
                 #job_file.write('workon pymatgen-GW; get_gap > gap; deactivate')
                 #job_file.write('echo '+path+'`get_gap` >> ../../gaps.dat')
                 job_file.close()
-                os.chmod(path+'/job', stat.S_IRWXU)
+                os.chmod(os.path.join(path, 'job'), stat.S_IRWXU)
                 path = os.path.join(s_name(self.structure) + path_add, option_prep_name)
                 # 'append submission of this job script to that of prep for this structure'
                 if add_to_collection:
-                    job_file = open(name=os.path.join(path, 'job'), mode='a')
+                    job_file = open(os.path.join(path, 'job'), mode='a')
                     job_file.write('cd ' + self.job + option_name + ' \n')
                     job_file.write('qsub job \n')
                     job_file.write('cd .. \n')

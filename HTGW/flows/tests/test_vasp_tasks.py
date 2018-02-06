@@ -2,11 +2,12 @@ from __future__ import division, print_function, unicode_literals
 
 from abipy.core.testing import AbipyTest
 from pymatgen import SETTINGS
-from HTGW.flows.GWtasks import VaspGWTask, VaspGWExecuteTask, VaspGWInputTask
+from HTGW.flows.GWtasks import VaspGWTask, VaspGWExecuteTask, VaspGWInputTask, SingleVaspGWWork
 from HTGW.flows.datastructures import GWSpecs
 from HTGW.flows.tests.test_helpers import structure
 from HTGW.flows.GWworks import VaspGWFWWorkFlow
-from HTGW.flows.helpers import add_gg_gap
+from HTGW.flows.helpers import add_gg_gap, s_name
+import os
 
 POTCAR_DIR = SETTINGS.get("VASP_PSP_DIR")
 
@@ -44,3 +45,16 @@ class GWVaspTest(AbipyTest):
         spec = GWSpecs()
 
         #task = VaspGWTask()
+
+    def test_VaspSingle(self):
+        spec = GWSpecs()
+        spec.data['code'] = 'VASP'
+        work = SingleVaspGWWork(structure=structure, spec=spec, job='prep')
+        work.create_input()
+        print(os.listdir('.'))
+        for f in ['INCAR', 'POTCAR', 'POSCAR', 'KPOINTS', 'INCAR.DIAG']:
+            self.assertIn(f, os.listdir(path=s_name(structure)))
+        work.create_job_script(add_to_collection=False)
+        self.assertIn('job', os.listdir(path=s_name(structure)))
+        work.create_job_script(mode='slurm', add_to_collection=False)
+        self.assertIn('job', os.listdir(path=s_name(structure)))
