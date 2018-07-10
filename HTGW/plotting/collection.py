@@ -52,11 +52,11 @@ class Collection(object):
         try:
             user = os.environ['MAR_USER']
         except KeyError:
-            user = raw_input('DataBase user name: ')
+            user = input('DataBase user name: ')
         try:
             pwd = os.environ['MAR_PAS']
         except KeyError:
-            pwd = raw_input('DataBase pwd: ')
+            pwd = input('DataBase pwd: ')
         db = local_serv[db_name]
         db.authenticate(user, pwd)
         if collection is None:
@@ -301,7 +301,7 @@ class Collection(object):
                 print('data  : ', item['results_file'], item['data_file'])
             except:
                 pass
-            keep = raw_input('Keep this item: (y, n) ')
+            keep = input('Keep this item: (y, n) ')
             if keep == 'n':
                 print('removing', item['_id'])
                 self.col.remove(item['_id'])
