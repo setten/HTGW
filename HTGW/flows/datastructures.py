@@ -95,9 +95,9 @@ class AbstractAbInitioSpec(MSONable):
         while len(key) != 0:
             print('Pseudos from: ', self.code_interface.read_ps_dir())
             print(self)
-            key = raw_input('enter key to change (h for help): ')
+            key = input('enter key to change (h for help): ')
             if key in self.data.keys():
-                value = raw_input('enter new value: ')
+                value = input('enter new value: ')
                 if isinstance(self.data[key], list):                        # list
                     if len(value) == 0:
                         print('removed', self.data[key].pop(-1))
@@ -592,11 +592,11 @@ class GWSpecs(AbstractAbInitioSpec):
             try:
                 user = os.environ['MAR_USER']
             except KeyError:
-                user = raw_input('DataBase user name: ')
+                user = input('DataBase user name: ')
             try:
                 pwd = os.environ['MAR_PAS']
             except KeyError:
-                pwd = raw_input('DataBase pwd: ')
+                pwd = input('DataBase pwd: ')
             db = local_serv[db_name]
             db.authenticate(user, pwd)
             col = db[collection]
