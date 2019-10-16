@@ -21,8 +21,8 @@ from HTGW.flows.GWtasks import *
 from abipy.abio.factories import g0w0_convergence_inputs
 
 # to move to flowtk?
-from pymatgen.io.abinit.works import G0W0Work
-from pymatgen.io.abinit.pseudos import PseudoTable
+from abipy.flowtk.works import G0W0Work
+from abipy.flowtk.pseudos import PseudoTable
 
 
 __author__ = "Michiel van Setten"

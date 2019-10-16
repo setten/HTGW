@@ -24,7 +24,7 @@ from HTGW.flows.tests.test_helpers import structure
 from abipy.abilab import Structure as AbiStructure
 from HTGW.flows.GWworks import GWWork, SingleAbinitGWWork, VaspGWFWWorkFlow
 from abipy.flowtk import Flow, ScfTask, NscfTask, SigmaTask
-from pymatgen.io.abinit.tasks import ScrTask  # this does not import via flowtk
+from abipy.flowtk.tasks import ScrTask  # this does not import via flowtk
 from pymatgen import SETTINGS
 
 POTCAR_DIR = SETTINGS.get("VASP_PSP_DIR")

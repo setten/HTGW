@@ -6,7 +6,7 @@ import gridfs
 import time as time
 from HTGW.plotting.plots import ConvTest
 from HTGW.plotting.my_abiobjects import MySigResFile, MyBandsFile
-from pymatgen.matproj.rest import MPRester, MPRestError
+from pymatgen.ext.matproj import MPRester, MPRestError
 from pymatgen.util.convergence import determine_convergence
 from gridfs.errors import NoFile
 from abipy.abilab import ElectronBandsPlotter
