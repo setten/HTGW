@@ -2,10 +2,10 @@ from __future__ import unicode_literals, division, print_function
 import unittest
 import os
 import tempfile
-from pymatgen.io.abinit.scheduler_error_parsers import get_parser, ALL_PARSERS, AbstractErrorParser
-from pymatgen.io.abinit.scheduler_error_parsers import SlurmErrorParser, PBSErrorParser
-from pymatgen.io.abinit.scheduler_error_parsers import SubmitError, FullQueueError, MemoryCancelError, TimeCancelError
-from pymatgen.io.abinit.scheduler_error_parsers import NodeFailureError
+from abipy.flowtk.scheduler_error_parsers import get_parser, ALL_PARSERS, AbstractErrorParser
+from abipy.flowtk.scheduler_error_parsers import SlurmErrorParser, PBSErrorParser
+from abipy.flowtk.scheduler_error_parsers import SubmitError, FullQueueError, MemoryCancelError, TimeCancelError
+from abipy.flowtk.scheduler_error_parsers import NodeFailureError
 
 __author__ = "Michiel van Setten"
 __copyright__ = " "
